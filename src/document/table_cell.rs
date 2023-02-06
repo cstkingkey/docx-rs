@@ -14,10 +14,10 @@ use crate::{__setter, __xml_test_suites, document::Paragraph, formatting::TableC
 ///
 /// let cell = TableCell::from(Paragraph::default());
 ///
-/// let cell = TableCell::pargraph(Paragraph::default())
+/// let cell = TableCell::paragraph(Paragraph::default())
 ///     .property(TableCellProperty::default());
 /// ```
-#[derive(Debug, XmlRead, XmlWrite, Clone)]
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:tc")]
 pub struct TableCell<'a> {
@@ -30,7 +30,7 @@ pub struct TableCell<'a> {
 impl<'a> TableCell<'a> {
     __setter!(property: TableCellProperty);
 
-    pub fn pargraph<T: Into<Paragraph<'a>>>(par: T) -> Self {
+    pub fn paragraph<T: Into<Paragraph<'a>>>(par: T) -> Self {
         TableCell {
             property: TableCellProperty::default(),
             content: vec![TableCellContent::Paragraph(par.into())],

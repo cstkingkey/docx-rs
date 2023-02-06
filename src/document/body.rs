@@ -2,7 +2,7 @@ use derive_more::From;
 use strong_xml::{XmlRead, XmlWrite};
 
 use crate::__xml_test_suites;
-use crate::document::{Paragraph, Table};
+use crate::document::{Paragraph, Table, TableCell};
 use crate::formatting::SectionProperty;
 
 use super::SDT;
@@ -34,6 +34,7 @@ impl<'a> Body<'a> {
                 BodyContent::Table(_) => None,
                 BodyContent::SectionProperty(_) => None,
                 BodyContent::Sdt(_) => None,
+                BodyContent::TableCell(_) => None
             })
             .flatten()
             .map(|t| t.to_string())
@@ -63,6 +64,7 @@ impl<'a> Body<'a> {
                 BodyContent::Table(_) => {}
                 BodyContent::SectionProperty(_) => {}
                 BodyContent::Sdt(_) => {}
+                BodyContent::TableCell(_) => {}
             }
         }
         Ok(())
@@ -99,6 +101,8 @@ pub enum BodyContent<'a> {
     Sdt(SDT<'a>),
     #[xml(tag = "w:sectPr")]
     SectionProperty(SectionProperty<'a>),
+    #[xml(tag = "w:tc")]
+    TableCell(TableCell<'a>)
 }
 
 __xml_test_suites!(

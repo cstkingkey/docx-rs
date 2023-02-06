@@ -89,7 +89,7 @@ pub struct SDTEndProperty {}
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:sdtContent")]
 pub struct SDTContent<'a> {
-    #[xml(child = "w:p", child = "w:tbl", child = "w:sectPr", child = "w:sdt")]
+    #[xml(child = "w:p", child = "w:tc", child = "w:tbl", child = "w:sectPr", child = "w:sdt")]
     pub content: Vec<BodyContent<'a>>,
 }
 
