@@ -30,16 +30,14 @@ impl<'a> Body<'a> {
             .content
             .iter()
             .filter_map(|content| match content {
-                BodyContent::Paragraph(para) => Some(para.iter_text()),
+                BodyContent::Paragraph(para) => Some(para.text()),
                 BodyContent::Table(_) => None,
                 BodyContent::SectionProperty(_) => None,
                 BodyContent::Sdt(_) => None,
                 BodyContent::TableCell(_) => None
             })
-            .flatten()
-            .map(|t| t.to_string())
             .collect();
-        v.join("")
+        v.join("\r\n")
     }
 
     pub fn replace_text_simple<S>(&mut self, old: S, new: S)
