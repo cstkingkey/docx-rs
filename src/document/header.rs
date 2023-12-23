@@ -25,6 +25,33 @@ impl<'a> Header<'a> {
         self.content.push(content.into());
         self
     }
+    pub fn replace_text_simple<S>(&mut self, old: S, new: S)
+    where
+        S: AsRef<str>,
+    {
+        let dic = (old, new);
+        let dic = vec![dic];
+        let _d = self.replace_text(&dic);
+    }
+
+    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    where
+        S: AsRef<str> + 'b,
+        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+    {
+        for content in self.content.iter_mut() {
+            match content {
+                BodyContent::Paragraph(p) => {
+                    p.replace_text(dic)?;
+                }
+                BodyContent::Table(_) => {}
+                BodyContent::SectionProperty(_) => {}
+                BodyContent::Sdt(_) => {}
+                BodyContent::TableCell(_) => {}
+            }
+        }
+        Ok(())
+    }
 }
 
 impl<'a> XmlWrite for Header<'a> {

@@ -54,6 +54,19 @@ impl<'a> TableCell<'a> {
             })
             .flatten()
     }
+
+    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    where
+        S: AsRef<str> + 'b,
+        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+    {
+        for content in self.content.iter_mut() {
+            if let TableCellContent::Paragraph(p) = content {
+                p.replace_text(dic)?
+            }
+        }
+        Ok(())
+    }
 }
 
 impl<'a, T: Into<TableCellContent<'a>>> From<T> for TableCell<'a> {

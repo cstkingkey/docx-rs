@@ -59,7 +59,9 @@ impl<'a> Body<'a> {
                 BodyContent::Paragraph(p) => {
                     p.replace_text(dic)?;
                 }
-                BodyContent::Table(_) => {}
+                BodyContent::Table(t) => {
+                    t.replace_text(dic)?;
+                }
                 BodyContent::SectionProperty(_) => {}
                 BodyContent::Sdt(_) => {}
                 BodyContent::TableCell(_) => {}

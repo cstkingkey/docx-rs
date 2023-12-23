@@ -1,6 +1,5 @@
 #![allow(unused_must_use)]
 use std::borrow::Cow;
-
 use strong_xml::{XmlRead, XmlWrite};
 
 use crate::{
@@ -58,6 +57,17 @@ impl<'a> Table<'a> {
             .iter_mut()
             .map(|content| content.iter_text_mut())
             .flatten()
+    }
+
+    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    where
+        S: AsRef<str> + 'b,
+        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+    {
+        for row in self.rows.iter_mut() {
+            row.replace_text(dic)?;
+        }
+        Ok(())
     }
 }
 
