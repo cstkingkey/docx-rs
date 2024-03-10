@@ -105,5 +105,5 @@ __xml_test_suites!(
     TableRow::default(),
     "<w:tr><w:trPr/></w:tr>",
     TableRow::default().push_cell(Paragraph::default()),
-    "<w:tr><w:trPr/><w:tc><w:tcPr/><w:p/></w:tc></w:tr>",
+    r#"<w:tr><w:trPr/><w:tc><w:tcPr><w:vAlign w:val="top"/></w:tcPr><w:p/></w:tc></w:tr>"#,
 );
