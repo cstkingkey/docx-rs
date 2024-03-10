@@ -478,7 +478,13 @@ __string_enum! {
 #[xml(tag = "w:vAlign")]
 pub struct VAlign {
     #[xml(attr = "w:val")]
-    pub val: TextDirectionType,
+    pub val: VAlignType,
+}
+
+impl From<VAlignType> for VAlign {
+    fn from(al_type: VAlignType) -> Self {
+        Self { val: al_type }
+    }
 }
 
 #[derive(Debug, Default, Clone)]
