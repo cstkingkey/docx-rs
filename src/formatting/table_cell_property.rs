@@ -9,7 +9,7 @@ pub struct TableCellProperty {
     #[xml(child = "w:tcW")]
     pub wide: Option<super::TableCellWidth>,
     #[xml(default, child = "w:vAlign")]
-    pub v_align: super::VAlign
+    pub v_align: super::VAlign,
 }
 
 impl TableCellProperty {
