@@ -64,7 +64,7 @@ impl<'a, T: Into<Cow<'a, str>>> From<T> for TableStyleId<'a> {
 #[xml(tag = "w:tblStylePr")]
 pub struct ConditionalTableProperty<'a> {
     #[xml(attr = "type")]
-    pub condition: ConditionType,
+    pub condition: Option<ConditionType>,
     /// Specifies a set of paragraph properties
     #[xml(default, child = "w:pPr")]
     pub paragraph: Option<super::ParagraphProperty<'a>>,
