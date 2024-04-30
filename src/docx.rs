@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
 use std::path::Path;
-use zip::{result::ZipError, write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
+use zip::write::SimpleFileOptions;
+use zip::{result::ZipError, CompressionMethod, ZipArchive, ZipWriter};
 
 use crate::document::{Comments, EndNotes, FootNotes, Footer, Header, Theme};
 use crate::media::MediaType;
@@ -61,7 +62,7 @@ impl<'a> Docx<'a> {
     pub fn write<W: Write + Seek>(&'a mut self, writer: W) -> DocxResult<W> {
         let mut writer = XmlWriter::new(ZipWriter::new(writer));
 
-        let opt = FileOptions::default()
+        let opt = SimpleFileOptions::default()
             .compression_method(CompressionMethod::Deflated)
             .unix_permissions(0o755);
 
