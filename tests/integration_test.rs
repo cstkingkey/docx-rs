@@ -31,22 +31,21 @@ fn read_list() {
 fn read_pandocs() {
     if let Ok(dir) = read_dir("./tests/pandoc/") {
         for entry in dir {
-            println!("{entry:?}");
-            // let entry = entry?;
             if let Ok(entry) = entry {
                 let path = entry.path();
-
                 // Check if the entry is a file
                 if path.is_file() {
                     match DocxFile::from_file(path) {
-                        Ok(_docx_file) => {
+                        Ok(docx_file) => {
                             // Process the DocxFile as needed
-                            assert!(true);
+                            match docx_file.parse() {
+                                Ok(_) => assert!(true),
+                                Err(err) => assert!(false, "Error processing file: {:?}", err),
+                            }
                         }
                         Err(err) => {
                             // Handle the error if DocxFile::from_file() fails
-                            println!("Error processing file: {:?}", err);
-                            assert!(false);
+                            assert!(false, "Error processing file: {:?}", err);
                         }
                     }
                 }
