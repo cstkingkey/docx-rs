@@ -459,8 +459,20 @@ impl DocxFile {
             None
         };
 
+        // let web_settings = if let Some(content) = &self.web_settings {
+        //     if let Ok(ws) = WebSettings::from_str(content) {
+        //         Some(ws)
+        //     } else {
+        //         None
+        //     }
+        // } else {
+        //     None
+        // };
         let web_settings = if let Some(content) = &self.web_settings {
-            Some(WebSettings::from_str(content)?)
+            let content = content.replace("ns0:", "w:").to_string();
+            Some(WebSettings::from_str(
+                &content.replace("ns0:", "w:").to_string(),
+            )?)
         } else {
             None
         };

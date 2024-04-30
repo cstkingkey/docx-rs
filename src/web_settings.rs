@@ -20,6 +20,8 @@ pub struct WebSettings {
     pub rely_on_vml: Option<RelyOnVml>,
     #[xml(child = "w:allowPNG")]
     pub allow_png: Option<AllowPNG>,
+    #[xml(child = "w:doNotSaveAsSingleFile")]
+    pub do_not_save_as_single_file: Option<DoNotSaveAsSingleFile>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -37,12 +39,18 @@ pub struct RelyOnVml {}
 #[xml(tag = "w:allowPNG")]
 pub struct AllowPNG {}
 
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "w:doNotSaveAsSingleFile")]
+pub struct DoNotSaveAsSingleFile {}
+
 impl XmlWrite for WebSettings {
     fn to_writer<W: Write>(&self, writer: &mut XmlWriter<W>) -> XmlResult<()> {
         let WebSettings {
             optimize_for_browser,
             rely_on_vml,
             allow_png,
+            do_not_save_as_single_file,
         } = self;
 
         log::debug!("[WebSettings] Started writing.");
@@ -61,6 +69,8 @@ impl XmlWrite for WebSettings {
         write_attr(rely_on_vml, writer)?;
 
         write_attr(allow_png, writer)?;
+
+        write_attr(do_not_save_as_single_file, writer)?;
 
         writer.write_element_end_close("w:webSettings")?;
 
