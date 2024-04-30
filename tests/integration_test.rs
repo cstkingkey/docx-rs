@@ -1,4 +1,6 @@
 extern crate docx_rust;
+use std::fs::read_dir;
+
 use docx_rust::DocxFile;
 
 #[test]
@@ -23,4 +25,32 @@ fn read_list() {
         "Dock。 List \r\nTest list\r\nNano editor\r\nTest\r\nNano",
         text
     );
+}
+
+#[test]
+fn read_pandocs() {
+    if let Ok(dir) = read_dir("./tests/pandoc/") {
+        for entry in dir {
+            println!("{entry:?}");
+            // let entry = entry?;
+            if let Ok(entry) = entry {
+                let path = entry.path();
+
+                // Check if the entry is a file
+                if path.is_file() {
+                    match DocxFile::from_file(path) {
+                        Ok(_docx_file) => {
+                            // Process the DocxFile as needed
+                            assert!(true);
+                        }
+                        Err(err) => {
+                            // Handle the error if DocxFile::from_file() fails
+                            println!("Error processing file: {:?}", err);
+                            assert!(false);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
