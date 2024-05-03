@@ -26,7 +26,7 @@ pub struct Numbering<'a> {
 #[xml(tag = "w:abstractNum")]
 pub struct AbstractNum<'a> {
     #[xml(attr = "w:abstractNumId")]
-    pub abstract_num_id: Cow<'a, str>,
+    pub abstract_num_id: Option<isize>,
     #[xml(child = "w:nsid")]
     pub nsid: Nsid<'a>,
     #[xml(child = "w:multiLevelType")]
@@ -56,7 +56,9 @@ pub struct MultiLevelType<'a> {
 #[xml(tag = "w:lvl")]
 pub struct Level<'a> {
     #[xml(attr = "w:ilvl")]
-    pub ilvl: Option<isize>,
+    pub i_level: Option<isize>,
+    #[xml(child = "w:start")]
+    pub start: Option<LevelStart>,
     #[xml(child = "w:numFmt")]
     pub number_format: Option<NumFmt<'a>>,
     #[xml(child = "w:lvlText")]
@@ -64,9 +66,9 @@ pub struct Level<'a> {
     #[xml(child = "w:lvlJc")]
     pub level_jc: Option<LevelJc<'a>>,
     #[xml(child = "w:pPr")]
-    pub w_pr: Option<PPr>,
+    pub p_pr: Option<PPr>,
     #[xml(child = "w:rPr")]
-    pub character: Option<CharacterProperty<'a>>,
+    pub r_pr: Vec<CharacterProperty<'a>>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -84,6 +86,15 @@ pub struct PPr {
 pub struct NumFmt<'a> {
     #[xml(attr = "w:val")]
     pub value: Cow<'a, str>,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "w:start")]
+/// TODO Replace by enum NumberFormat
+pub struct LevelStart {
+    #[xml(attr = "w:val")]
+    pub value: Option<isize>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -107,19 +118,19 @@ pub struct LevelJc<'a> {
 #[xml(tag = "w:num")]
 pub struct Num<'a> {
     #[xml(attr = "w:numId")]
-    pub num_id: Cow<'a, str>,
+    pub num_id: Option<isize>,
     #[xml(child = "w:abstractNumId")]
-    pub abstract_num_id: Option<AbstractNumId<'a>>,
+    pub abstract_num_id: Option<AbstractNumId>,
     #[xml(child = "w:lvlOverride")]
-    pub lvl_overrides: Vec<LvlOverride<'a>>,
+    pub lvl_overrides: Vec<LevelOverride<'a>>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:lvlOverride")]
-pub struct LvlOverride<'a> {
+pub struct LevelOverride<'a> {
     #[xml(attr = "w:ilvl")]
-    pub ilvl: Cow<'a, str>,
+    pub i_level: Option<isize>,
     #[xml(child = "w:startOverride")]
     pub start_override: StartOverride<'a>,
 }
@@ -135,9 +146,9 @@ pub struct StartOverride<'a> {
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:abstractNumId")]
-pub struct AbstractNumId<'a> {
+pub struct AbstractNumId {
     #[xml(attr = "w:val")]
-    pub value: Cow<'a, str>,
+    pub value: Option<isize>,
 }
 
 impl<'a> XmlWrite for Numbering<'a> {
