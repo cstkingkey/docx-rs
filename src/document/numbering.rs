@@ -132,15 +132,15 @@ pub struct LevelOverride<'a> {
     #[xml(attr = "w:ilvl")]
     pub i_level: Option<isize>,
     #[xml(child = "w:startOverride")]
-    pub start_override: StartOverride<'a>,
+    pub start_override: StartOverride,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:startOverride")]
-pub struct StartOverride<'a> {
+pub struct StartOverride {
     #[xml(attr = "w:val")]
-    pub value: Cow<'a, str>,
+    pub value: Option<isize>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
