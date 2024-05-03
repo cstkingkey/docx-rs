@@ -28,6 +28,8 @@ pub struct Indent {
     pub first_line_chars: Option<isize>,
     #[xml(attr = "w:firstLine")]
     pub first_line: Option<isize>,
+    #[xml(attr = "w:hanging")]
+    pub hanging: Option<isize>,
 }
 
 impl Indent {

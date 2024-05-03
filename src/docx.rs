@@ -6,11 +6,11 @@ use std::path::Path;
 use zip::write::SimpleFileOptions;
 use zip::{result::ZipError, CompressionMethod, ZipArchive, ZipWriter};
 
-use crate::document::{Comments, EndNotes, FootNotes, Footer, Header, Theme};
+use crate::document::{Comments, EndNotes, FootNotes, Footer, Header, Numbering, Theme};
 use crate::media::MediaType;
 use crate::schema::{
-    SCHEMA_COMMENTS, SCHEMA_ENDNOTES, SCHEMA_FOOTNOTES, SCHEMA_HEADER, SCHEMA_SETTINGS,
-    SCHEMA_THEME, SCHEMA_WEB_SETTINGS,
+    SCHEMA_COMMENTS, SCHEMA_ENDNOTES, SCHEMA_FOOTNOTES, SCHEMA_HEADER, SCHEMA_NUMBERING,
+    SCHEMA_SETTINGS, SCHEMA_THEME, SCHEMA_WEB_SETTINGS,
 };
 use crate::settings::Settings;
 use crate::web_settings::WebSettings;
@@ -56,6 +56,7 @@ pub struct Docx<'a> {
     pub settings: Option<Settings<'a>>,
     pub web_settings: Option<WebSettings>,
     pub comments: Option<Comments<'a>>,
+    pub numbering: Option<Numbering<'a>>,
 }
 
 impl<'a> Docx<'a> {
@@ -119,6 +120,12 @@ impl<'a> Docx<'a> {
                 .add_rel(SCHEMA_COMMENTS, "comments.xml");
         }
 
+        if self.numbering.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_NUMBERING, "numbering.xml");
+        }
+
         for hd in &self.headers {
             self.document_rels
                 .get_or_insert(Relationships::default())
@@ -179,6 +186,7 @@ impl<'a> Docx<'a> {
             Some(self.settings)       => "word/settings.xml"
             Some(self.web_settings)   => "word/webSettings.xml"
             Some(self.comments)       => "word/comments.xml"
+            Some(self.numbering)      => "word/numbering.xml"
             Some(self.document_rels)  => "word/_rels/document.xml.rels"
         );
 
@@ -243,6 +251,7 @@ pub struct DocxFile {
     footnotes: Option<String>,
     endnotes: Option<String>,
     comments: Option<String>,
+    numbering: Option<String>,
 }
 
 impl DocxFile {
@@ -322,6 +331,7 @@ impl DocxFile {
         let footnotes = option_read!(Footnotes, "word/footnotes.xml");
         let endnotes = option_read!(Endnotes, "word/endnotes.xml");
         let comments = option_read!(Comments, "word/comments.xml");
+        let numbering = option_read!(Numbering, "word/numbering.xml");
 
         let headers = option_read_multiple!(Headers, "word/header");
         let footers = option_read_multiple!(Footers, "word/footer");
@@ -346,6 +356,7 @@ impl DocxFile {
             footnotes,
             endnotes,
             comments,
+            numbering,
         })
     }
 
@@ -483,6 +494,12 @@ impl DocxFile {
             None
         };
 
+        let numbering = if let Some(content) = &self.numbering {
+            Some(Numbering::from_str(content)?)
+        } else {
+            None
+        };
+
         let rels = Relationships::from_str(&self.rels)?;
         let rels = {
             let rrr: Vec<_> = rels
@@ -526,6 +543,7 @@ impl DocxFile {
             settings,
             web_settings,
             comments,
+            numbering,
         })
     }
 }
