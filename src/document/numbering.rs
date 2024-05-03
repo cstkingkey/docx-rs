@@ -7,7 +7,7 @@ use hard_xml::{XmlRead, XmlResult, XmlWrite, XmlWriter};
 use std::{borrow::Cow, io::Write};
 
 use crate::{
-    formatting::{CharacterProperty, Indent},
+    formatting::{CharacterProperty, Indent, JustificationVal},
     schema::{SCHEMA_MAIN, SCHEMA_WORDML_14},
 };
 
@@ -64,7 +64,7 @@ pub struct Level<'a> {
     #[xml(child = "w:lvlText")]
     pub level_text: Option<LevelText<'a>>,
     #[xml(child = "w:lvlJc")]
-    pub level_jc: Option<LevelJc<'a>>,
+    pub justification: Option<LevelJustification>,
     #[xml(child = "w:pPr")]
     pub p_pr: Option<PPr>,
     #[xml(child = "w:rPr")]
@@ -105,12 +105,12 @@ pub struct LevelText<'a> {
     pub value: Cow<'a, str>,
 }
 
-#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[derive(Debug, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:lvlJc")]
-pub struct LevelJc<'a> {
+pub struct LevelJustification {
     #[xml(attr = "w:val")]
-    pub value: Cow<'a, str>,
+    pub value: JustificationVal,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
