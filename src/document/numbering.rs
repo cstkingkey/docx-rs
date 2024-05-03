@@ -32,7 +32,7 @@ pub struct AbstractNum<'a> {
     #[xml(child = "w:multiLevelType")]
     pub multi_level_type: MultiLevelType<'a>,
     #[xml(child = "w:lvl")]
-    pub levels: Vec<Lvl<'a>>,
+    pub levels: Vec<Level<'a>>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -54,7 +54,7 @@ pub struct MultiLevelType<'a> {
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:lvl")]
-pub struct Lvl<'a> {
+pub struct Level<'a> {
     #[xml(attr = "w:ilvl")]
     pub ilvl: Option<isize>,
     #[xml(child = "w:numFmt")]
