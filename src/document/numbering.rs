@@ -18,7 +18,7 @@ pub struct Numbering<'a> {
     #[xml(child = "w:abstractNum")]
     pub abstract_nums: Vec<AbstractNum<'a>>,
     #[xml(child = "w:num")]
-    pub nums: Vec<Num<'a>>,
+    pub nums: Vec<Num>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -116,19 +116,19 @@ pub struct LevelJustification {
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:num")]
-pub struct Num<'a> {
+pub struct Num {
     #[xml(attr = "w:numId")]
     pub num_id: Option<isize>,
     #[xml(child = "w:abstractNumId")]
     pub abstract_num_id: Option<AbstractNumId>,
     #[xml(child = "w:lvlOverride")]
-    pub lvl_overrides: Vec<LevelOverride<'a>>,
+    pub lvl_overrides: Vec<LevelOverride>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:lvlOverride")]
-pub struct LevelOverride<'a> {
+pub struct LevelOverride {
     #[xml(attr = "w:ilvl")]
     pub i_level: Option<isize>,
     #[xml(child = "w:startOverride")]
