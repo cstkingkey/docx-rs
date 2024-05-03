@@ -121,7 +121,7 @@ pub struct ParagraphProperty<'a> {
     #[xml(child = "w:cnfStyle")]
     pub cnf_style: Option<CnfStyle<'a>>,
     #[xml(child = "w:rPr")]
-    pub r_pr: Option<super::CharacterProperty<'a>>,
+    pub r_pr: Vec<super::CharacterProperty<'a>>,
     #[xml(child = "w:sectPr")]
     pub section_property: Option<SectionProperty<'a>>,
     #[xml(child = "w:pPrChange")]
