@@ -14,11 +14,15 @@ use crate::{
 #[derive(Debug, Default, XmlRead, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:numbering")]
+/// Numbering defines ordered and unordered lists.
 pub struct Numbering<'a> {
     #[xml(child = "w:abstractNum")]
-    pub abstract_nums: Vec<AbstractNum<'a>>,
+    /// Abstract numberings are not used directly when laying out your document.
+    /// Instead, they are referred to by the numberings.
+    pub abstract_numberings: Vec<AbstractNum<'a>>,
     #[xml(child = "w:num")]
-    pub nums: Vec<Num>,
+    /// Numberings are used by your document and refer to abstract numberings for layout.
+    pub numberings: Vec<Num>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -122,7 +126,7 @@ pub struct Num {
     #[xml(child = "w:abstractNumId")]
     pub abstract_num_id: Option<AbstractNumId>,
     #[xml(child = "w:lvlOverride")]
-    pub lvl_overrides: Vec<LevelOverride>,
+    pub level_overrides: Vec<LevelOverride>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -132,7 +136,7 @@ pub struct LevelOverride {
     #[xml(attr = "w:ilvl")]
     pub i_level: Option<isize>,
     #[xml(child = "w:startOverride")]
-    pub start_override: StartOverride,
+    pub start_override: Option<StartOverride>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -151,11 +155,49 @@ pub struct AbstractNumId {
     pub value: Option<isize>,
 }
 
+impl<'a> Numbering<'a> {
+    pub fn numbering_details(&self, id: isize) -> Option<AbstractNum> {
+        self.numberings.iter().find_map(|n| {
+            if n.num_id != Some(id) || n.abstract_num_id.is_none() {
+                None
+            } else {
+                if let Some(abstract_num_id) = &n.abstract_num_id {
+                    if let Some(abstract_numbering) = self
+                        .abstract_numberings
+                        .iter()
+                        .find(|an| an.abstract_num_id == abstract_num_id.value)
+                    {
+                        let mut an = abstract_numbering.clone();
+                        n.level_overrides.iter().for_each(|o| {
+                            let LevelOverride {
+                                i_level,
+                                start_override,
+                            } = o;
+                            if i_level.is_some() && start_override.is_some() {
+                                if let Some(level) =
+                                    an.levels.iter_mut().find(|level| level.i_level == *i_level)
+                                {
+                                    level.start = Some(LevelStart {
+                                        value: start_override.as_ref().unwrap().value.clone(),
+                                    });
+                                }
+                            }
+                        });
+                        return Some(an);
+                    }
+                }
+
+                None
+            }
+        })
+    }
+}
+
 impl<'a> XmlWrite for Numbering<'a> {
     fn to_writer<W: Write>(&self, writer: &mut XmlWriter<W>) -> XmlResult<()> {
         let Numbering {
-            abstract_nums,
-            nums,
+            abstract_numberings: abstract_nums,
+            numberings: nums,
         } = self;
 
         log::debug!("[Numbering] Started writing.");
@@ -259,11 +301,11 @@ const NUMBERING_XML: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="
 #[test]
 fn xml_parsing() {
     let numbering = Numbering::from_str(NUMBERING_XML).unwrap();
-    assert_eq!(numbering.abstract_nums.len(), 2);
-    assert_eq!(numbering.nums.len(), 2);
-    assert_eq!(numbering.abstract_nums[0].nsid.value, "0000A990");
+    assert_eq!(numbering.abstract_numberings.len(), 2);
+    assert_eq!(numbering.numberings.len(), 2);
+    assert_eq!(numbering.abstract_numberings[0].nsid.value, "0000A990");
     assert_eq!(
-        numbering.abstract_nums[0].levels[0]
+        numbering.abstract_numberings[0].levels[0]
             .number_format
             .as_ref()
             .unwrap()
@@ -271,9 +313,47 @@ fn xml_parsing() {
         "bullet"
     );
     assert_eq!(
-        numbering.nums[0].abstract_num_id.as_ref().unwrap().value,
+        numbering.numberings[0]
+            .abstract_num_id
+            .as_ref()
+            .unwrap()
+            .value,
         Some(990_isize)
     );
+}
+
+#[test]
+fn find_numbering_details() {
+    let numbering = Numbering::from_str(NUMBERING_XML).unwrap();
+    if let Some(num) = numbering.numbering_details(
+        numbering.numberings[0]
+            .abstract_num_id
+            .as_ref()
+            .unwrap()
+            .value
+            .unwrap(),
+    ) {
+        assert_eq!(
+            num.levels[0].number_format,
+            Some(NumFmt {
+                value: Cow::Borrowed("bullet")
+            })
+        );
+    }
+    if let Some(num) = numbering.numbering_details(1001) {
+        assert_eq!(
+            num.levels[0].number_format,
+            Some(NumFmt {
+                value: Cow::Borrowed("decimal")
+            })
+        );
+        assert_eq!(
+            num.levels[1].level_text,
+            Some(LevelText {
+                value: Cow::Borrowed("%2.")
+            })
+        );
+    }
 }
 
 #[test]
