@@ -153,6 +153,11 @@ pub struct AbstractNumId {
 
 impl<'a> XmlWrite for Numbering<'a> {
     fn to_writer<W: Write>(&self, writer: &mut XmlWriter<W>) -> XmlResult<()> {
+        let Numbering {
+            abstract_nums,
+            nums,
+        } = self;
+
         log::debug!("[Numbering] Started writing.");
 
         let _ = write!(writer.inner, "{}", crate::schema::SCHEMA_XML);
@@ -165,10 +170,140 @@ impl<'a> XmlWrite for Numbering<'a> {
 
         writer.write_element_end_open()?;
 
-        writer.write_element_end_close("w:comments")?;
+        for an in abstract_nums {
+            an.to_writer(writer)?;
+        }
 
-        log::debug!("[Comments] Finished writing.");
+        for num in nums {
+            num.to_writer(writer)?;
+        }
+
+        writer.write_element_end_close("w:numbering")?;
+
+        log::debug!("[Numbering] Finished writing.");
 
         Ok(())
     }
+}
+
+#[cfg(test)]
+
+const NUMBERING_XML: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:abstractNum w:abstractNumId="990">
+            <w:nsid w:val="0000A990" />
+            <w:multiLevelType w:val="multilevel" />
+            <w:lvl w:ilvl="0">
+                <w:numFmt w:val="bullet" />
+                <w:lvlText w:val=" " />
+                <w:lvlJc w:val="left" />
+                <w:pPr>
+                    <w:ind w:left="720" w:hanging="360" />
+                </w:pPr>
+            </w:lvl>
+            <w:lvl w:ilvl="1">
+                <w:numFmt w:val="bullet" />
+                <w:lvlText w:val=" " />
+                <w:lvlJc w:val="left" />
+                <w:pPr>
+                    <w:ind w:left="1440" w:hanging="360" />
+                </w:pPr>
+            </w:lvl>
+        </w:abstractNum>
+        <w:abstractNum w:abstractNumId="99411">
+            <w:nsid w:val="00A99411" />
+            <w:multiLevelType w:val="multilevel" />
+            <w:lvl w:ilvl="0">
+                <w:start w:val="1" />
+                <w:numFmt w:val="decimal" />
+                <w:lvlText w:val="%1." />
+                <w:lvlJc w:val="left" />
+                <w:pPr>
+                    <w:ind w:left="720" w:hanging="360" />
+                </w:pPr>
+            </w:lvl>
+            <w:lvl w:ilvl="1">
+                <w:start w:val="1" />
+                <w:numFmt w:val="decimal" />
+                <w:lvlText w:val="%2." />
+                <w:lvlJc w:val="left" />
+                <w:pPr>
+                    <w:ind w:left="1440" w:hanging="360" />
+                </w:pPr>
+            </w:lvl>
+            <w:lvl w:ilvl="2">
+                <w:start w:val="1" />
+                <w:numFmt w:val="decimal" />
+                <w:lvlText w:val="%3." />
+                <w:lvlJc w:val="left" />
+                <w:pPr>
+                    <w:ind w:left="2160" w:hanging="360" />
+                </w:pPr>
+            </w:lvl>
+        </w:abstractNum>
+        <w:num w:numId="1000">
+            <w:abstractNumId w:val="990" />
+        </w:num>
+        <w:num w:numId="1001">
+            <w:abstractNumId w:val="99411" />
+            <w:lvlOverride w:ilvl="0">
+                <w:startOverride w:val="1" />
+            </w:lvlOverride>
+            <w:lvlOverride w:ilvl="1">
+                <w:startOverride w:val="1" />
+            </w:lvlOverride>
+        </w:num>
+    </w:numbering>
+"#;
+
+#[test]
+fn xml_parsing() {
+    let numbering = Numbering::from_str(NUMBERING_XML).unwrap();
+    assert_eq!(numbering.abstract_nums.len(), 2);
+    assert_eq!(numbering.nums.len(), 2);
+    assert_eq!(numbering.abstract_nums[0].nsid.value, "0000A990");
+    assert_eq!(
+        numbering.abstract_nums[0].levels[0]
+            .number_format
+            .as_ref()
+            .unwrap()
+            .value,
+        "bullet"
+    );
+    assert_eq!(
+        numbering.nums[0].abstract_num_id.as_ref().unwrap().value,
+        Some(990_isize)
+    );
+}
+
+#[test]
+fn xml_writing() {
+    fn replace_whitespace(input: &str, replacement: &str) -> String {
+        let mut result = String::new();
+        let mut last_was_whitespace_or_bracket = false;
+
+        for c in input.chars() {
+            if c.is_whitespace() {
+                if !last_was_whitespace_or_bracket {
+                    result.push_str(replacement);
+                    last_was_whitespace_or_bracket = true;
+                }
+            } else {
+                result.push(c);
+                last_was_whitespace_or_bracket = if c == '>' || c == '"' { true } else { false };
+            }
+        }
+
+        result
+    }
+
+    let numbering = Numbering::from_str(NUMBERING_XML).unwrap();
+    let result = numbering.to_string().unwrap();
+    assert_eq!(
+        replace_whitespace(NUMBERING_XML, " "),
+        replace_whitespace(
+            &result.replace(&format!(" xmlns:w14=\"{SCHEMA_WORDML_14}\""), ""),
+            " "
+        )
+    );
 }
