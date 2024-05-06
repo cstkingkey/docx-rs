@@ -156,6 +156,10 @@ pub struct AbstractNumId {
 }
 
 impl<'a> Numbering<'a> {
+    /// Actual numberings refer to abstract numberings, and may overrule some settings.
+    /// This helper function takes an numbering id that is provided in a paragraph, looks up
+    /// the details in the numbering section and merges it with the abstract numbering to get
+    /// a complete AbstractNum object.
     pub fn numbering_details(&self, id: isize) -> Option<AbstractNum> {
         self.numberings.iter().find_map(|n| {
             if n.num_id != Some(id) || n.abstract_num_id.is_none() {
