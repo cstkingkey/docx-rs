@@ -101,3 +101,36 @@ __xml_test_suites!(
     )
     .as_str(),
 );
+
+#[test]
+fn regular_namespace() {
+    let alt_web_settings = r#"<?xml version="1.0" encoding="UTF-8"?>
+    <w:webSettings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:allowPNG />
+        <w:doNotSaveAsSingleFile />
+    </w:webSettings>
+    "#;
+    let web_settings = WebSettings::from_str(&alt_web_settings).unwrap();
+    assert_eq!(web_settings.allow_png, Some(AllowPNG {}));
+    assert_eq!(
+        web_settings.do_not_save_as_single_file,
+        Some(DoNotSaveAsSingleFile {})
+    );
+}
+
+#[test]
+fn alternative_namespace() {
+    let alt_web_settings = r#"<?xml version="1.0" encoding="UTF-8"?>
+    <ns0:webSettings xmlns:ns0="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <ns0:allowPNG />
+        <ns0:doNotSaveAsSingleFile />
+    </ns0:webSettings>
+    "#
+    .replace("ns0:", "w:");
+    let web_settings = WebSettings::from_str(&alt_web_settings).unwrap();
+    assert_eq!(web_settings.allow_png, Some(AllowPNG {}));
+    assert_eq!(
+        web_settings.do_not_save_as_single_file,
+        Some(DoNotSaveAsSingleFile {})
+    );
+}
