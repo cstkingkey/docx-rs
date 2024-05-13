@@ -400,13 +400,13 @@ impl DocxFile {
             }
         }
 
-        let themes = HashMap::new();
+        let mut themes = HashMap::new();
         // turn off for now
-        // for t in self.themes.iter() {
-        //     let th = Theme::from_str(&t.1)?;
-        //     let name = t.0.replace("word/", "");
-        //     themes.insert(name, th);
-        // }
+        for t in self.themes.iter() {
+            let th = Theme::from_str(&t.1)?;
+            let name = t.0.replace("word/", "");
+            themes.insert(name, th);
+        }
 
         let content_types = ContentTypes::from_str(&self.content_types)?;
 
@@ -470,17 +470,7 @@ impl DocxFile {
             None
         };
 
-        // let web_settings = if let Some(content) = &self.web_settings {
-        //     if let Ok(ws) = WebSettings::from_str(content) {
-        //         Some(ws)
-        //     } else {
-        //         None
-        //     }
-        // } else {
-        //     None
-        // };
         let web_settings = if let Some(content) = &self.web_settings {
-            let content = content.replace("ns0:", "w:").to_string();
             Some(WebSettings::from_str(
                 &content.replace("ns0:", "w:").to_string(),
             )?)
