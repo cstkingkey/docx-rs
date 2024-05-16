@@ -3,6 +3,7 @@ use std::fs::read_dir;
 
 use docx_rust::{
     document::{BodyContent, ParagraphContent, RunContent},
+    rels::TargetMode,
     DocxFile,
 };
 
@@ -28,6 +29,36 @@ fn read_list() {
         "Dock。 List \r\nTest list\r\nNano editor\r\nTest\r\nNano",
         text
     );
+}
+
+#[test]
+fn read_external_links() {
+    let path = std::path::Path::new("./tests/pandoc/links.docx");
+    let book = DocxFile::from_file(path).unwrap();
+    let docx = book.parse().unwrap();
+    if let Some(document_relationships) = docx.document_rels {
+        assert_eq!(document_relationships.relationships.len(), 10);
+        assert_eq!(
+            document_relationships
+                .relationships
+                .iter()
+                .filter(|r| {
+                    match &r.target_mode {
+                        Some(target_mode) => *target_mode == TargetMode::External,
+                        None => false,
+                    }
+                })
+                .collect::<Vec<_>>()
+                .len(),
+            2
+        );
+        assert_eq!(
+            document_relationships.relationships.last().unwrap().target,
+            "http://pandoc.org/README.html#synopsis"
+        );
+    } else {
+        assert!(false);
+    }
 }
 
 #[test]
@@ -81,6 +112,7 @@ fn read_image() {
                                                 assert_eq!(1905000, extent.cx);
                                                 assert_eq!(1905000, extent.cy);
                                             }
+
                                             if let Some(graphic) = inline.graphic {
                                                 if let Some(cnvpr) =
                                                     graphic.data.pic.nv_pic_pr.c_nv_pr

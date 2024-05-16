@@ -53,6 +53,8 @@ pub const SCHEMA_COMMENTS: &str =
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments";
 pub const SCHEMA_NUMBERING: &str =
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering";
+pub const SCHEMA_HYPERLINK: &str =
+    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink";
 
 pub const SCHEMA_COMMENTS_EXT: &str =
     "http://schemas.microsoft.com/office/2018/08/relationships/commentsExtensible";

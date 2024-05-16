@@ -7,6 +7,7 @@ use hard_xml::{XmlRead, XmlResult, XmlWrite, XmlWriter};
 use std::borrow::Cow;
 use std::io::Write;
 
+use crate::__string_enum;
 use crate::schema::SCHEMA_RELATIONSHIPS;
 
 #[derive(Debug, Default, XmlRead, Clone)]
@@ -69,6 +70,42 @@ impl<'a> Relationships<'a> {
                 id: format!("rId{}", id).into(),
                 target: target.into(),
                 ty: schema.into(),
+                target_mode: None,
+            });
+        }
+    }
+
+    pub fn add_rel_with_target_mode(
+        &mut self,
+        schema: &'a str,
+        target: &'a str,
+        target_mode: Option<&'a str>,
+    ) {
+        let has = self.relationships.iter().find(|r| r.target == target);
+        if has.is_none() {
+            let ids: Vec<_> = self
+                .relationships
+                .iter()
+                .map(|r| r.id.to_string())
+                .collect();
+
+            let len = self.relationships.len();
+
+            let mut available = false;
+            let mut id = len;
+            while !available {
+                id += 1;
+                let idstr = format!("rId{}", id);
+                available = !ids.contains(&idstr);
+            }
+
+            //hack
+            //let target = target.replace("jpeg","png");
+            self.relationships.push(Relationship {
+                id: format!("rId{}", id).into(),
+                target: target.into(),
+                ty: schema.into(),
+                target_mode: TargetMode::from_str(target_mode),
             });
         }
     }
@@ -81,6 +118,38 @@ impl<'a> Relationships<'a> {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(test, derive(Eq))]
+pub enum TargetMode {
+    Internal,
+    External,
+}
+
+__string_enum! {
+    TargetMode {
+        Internal = "Internal",
+        External = "External",
+    }
+}
+
+impl From<&str> for TargetMode {
+    fn from(value: &str) -> Self {
+        match value {
+            "External" => TargetMode::External,
+            _ => TargetMode::Internal,
+        }
+    }
+}
+
+impl TargetMode {
+    fn from_str(option_str: Option<&str>) -> Option<Self> {
+        match option_str {
+            Some(s) => Some(s.into()),
+            None => None,
+        }
+    }
+}
+
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[xml(tag = "Relationship")]
 pub struct Relationship<'a> {
@@ -90,4 +159,6 @@ pub struct Relationship<'a> {
     pub target: Cow<'a, str>,
     #[xml(attr = "Type")]
     pub ty: Cow<'a, str>,
+    #[xml(attr = "TargetMode")]
+    pub target_mode: Option<TargetMode>,
 }

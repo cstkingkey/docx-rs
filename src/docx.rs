@@ -430,7 +430,7 @@ impl DocxFile {
                         r2.ty.to_string().as_str(),
                         crate::schema::SCHEMA_HEADER
                             | crate::schema::SCHEMA_FOOTER
-                            //| crate::schema::SCHEMA_THEME
+                            | crate::schema::SCHEMA_THEME
                             | crate::schema::SCHEMA_FONT_TABLE
                             | crate::schema::SCHEMA_STYLES
                             | crate::schema::SCHEMA_FOOTNOTES
@@ -439,6 +439,8 @@ impl DocxFile {
                             | crate::schema::SCHEMA_WEB_SETTINGS
                             | crate::schema::SCHEMA_COMMENTS
                             | crate::schema::SCHEMA_IMAGE
+                            | crate::schema::SCHEMA_HYPERLINK
+                            | crate::schema::SCHEMA_NUMBERING
                     )
                 })
                 .map(|d| d.to_owned())
