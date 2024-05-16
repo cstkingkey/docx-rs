@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use derive_more::From;
 use hard_xml::{XmlRead, XmlWrite};
 
-use crate::__string_enum;
+use crate::{__define_enum, __string_enum};
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
@@ -159,7 +159,7 @@ pub struct WrapTopAndBottom {}
 #[xml(tag = "wp:positionH")]
 pub struct PositionHorizontal {
     #[xml(attr = "relativeFrom")]
-    pub relative_from: Option<RelativeFrom>,
+    pub relative_from: Option<RelativeFromH>,
     #[xml(flatten_text = "wp:posOffset")]
     pub pos_offset: Option<isize>,
 }
@@ -169,30 +169,34 @@ pub struct PositionHorizontal {
 #[xml(tag = "wp:positionV")]
 pub struct PositionVertical {
     #[xml(attr = "relativeFrom")]
-    pub relative_from: Option<RelativeFrom>,
+    pub relative_from: Option<RelativeFromV>,
     #[xml(flatten_text = "wp:posOffset")]
     pub pos_offset: Option<isize>,
 }
 
-/// Specifies the break type of a break
-///
-/// The default value is TextWrapping.
-#[derive(Debug, Clone)]
-#[cfg_attr(test, derive(PartialEq))]
-pub enum RelativeFrom {
-    /// Text restarts on the next column.
-    Column,
-    /// Text restarts on the next page.
-    Paragraph,
-    /// Text restarts on the next line.
-    Row,
+__define_enum! {
+    RelativeFromH {
+        Margin= "margin",	//Page Margin
+        Page = "page",//	Page Edge
+        Column= "column",//	Column
+        Character= "character",//	Character
+        LeftMargin= "leftMargin",//	Left Margin
+        RightMargin= "rightMargin",//	Right Margin
+        InsideMargin= "insideMargin",//	Inside Margin
+        OUtsideMargin= "outsideMargin",//	Outside Margin
+    }
 }
 
-__string_enum! {
-    RelativeFrom {
-        Column = "column",
-        Row = "row",
-        Paragraph = "paragraph",
+__define_enum! {
+    RelativeFromV {
+        Margin= "margin",	//Page Margin
+        Page = "page",//	Page Edge
+        Paragraph= "paragraph",//	Paragraph
+        Line= "Line",//	Line
+        TopMargin= "toptMargin",//	Left Margin
+        BottomMargin= "bottomMargin",//	Right Margin
+        InsideMargin= "insideMargin",//	Inside Margin
+        OUtsideMargin= "outsideMargin",//	Outside Margin
     }
 }
 
