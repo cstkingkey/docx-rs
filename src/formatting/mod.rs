@@ -31,6 +31,7 @@ mod spacing;
 mod strike;
 mod table_borders;
 mod table_cell_property;
+mod table_header;
 mod table_indent;
 mod table_justification;
 mod table_margin;
@@ -46,6 +47,6 @@ pub use self::{
     indent::*, indent_level::*, italics::*, justification::*, lang::*, numbering_id::*,
     numbering_property::*, outline::*, page_cols::*, page_grid::*, page_margin::*, page_size::*,
     paragraph_property::*, section_property::*, size::*, spacing::*, strike::*, table_borders::*,
-    table_cell_property::*, table_indent::*, table_justification::*, table_property::*,
-    table_row_property::*, table_width::*, underline::*, widow_control::*,
+    table_cell_property::*, table_header::*, table_indent::*, table_justification::*,
+    table_property::*, table_row_property::*, table_width::*, underline::*, widow_control::*,
 };
