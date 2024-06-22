@@ -1,32 +1,18 @@
 use std::io::Error as IOError;
 
 use hard_xml::XmlError;
+use thiserror::Error;
 use zip::result::ZipError;
 
 /// Error type of docx-rs
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum DocxError {
-    IO(IOError),
-    Xml(XmlError),
-    Zip(ZipError),
-}
-
-impl From<IOError> for DocxError {
-    fn from(err: IOError) -> Self {
-        DocxError::IO(err)
-    }
-}
-
-impl From<XmlError> for DocxError {
-    fn from(err: XmlError) -> Self {
-        DocxError::Xml(err)
-    }
-}
-
-impl From<ZipError> for DocxError {
-    fn from(err: ZipError) -> Self {
-        DocxError::Zip(err)
-    }
+    #[error("IO error: {0}")]
+    IO(#[from] IOError),
+    #[error("malformed XML: {0}")]
+    Xml(#[from] XmlError),
+    #[error("unable to unpack file: {0}")]
+    Zip(#[from] ZipError),
 }
 
 /// Specialized `Result` which the error value is `DocxError`.
