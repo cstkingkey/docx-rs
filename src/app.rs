@@ -11,14 +11,14 @@ use crate::schema::{SCHEMAS_EXTENDED, SCHEMA_DOC_PROPS_V_TYPES, SCHEMA_XML};
 #[derive(Debug, XmlRead, XmlWrite, Clone)]
 pub enum App<'a> {
     #[xml(tag = "Properties")]
-    NewOpenXmlApp(NewOpenXmlApp<'a>),
+    AppNoApNamespace(AppNoApNamespace<'a>),
     #[xml(tag = "ap:Properties")]
-    OldOpenXmlApp(OldOpenXmlApp<'a>),
+    AppWithApNamespace(AppWithApNamespace<'a>),
 }
 
 #[derive(Debug, XmlRead, Clone)]
 #[xml(tag = "Properties")]
-pub struct NewOpenXmlApp<'a> {
+pub struct AppNoApNamespace<'a> {
     #[xml(flatten_text = "Template")]
     pub template: Option<Cow<'a, str>>,
     #[xml(flatten_text = "TotalTime")]
@@ -55,7 +55,7 @@ pub struct NewOpenXmlApp<'a> {
 
 #[derive(Debug, XmlRead, Clone)]
 #[xml(tag = "ap:Properties")]
-pub struct OldOpenXmlApp<'a> {
+pub struct AppWithApNamespace<'a> {
     #[xml(flatten_text = "ap:Template")]
     pub template: Option<Cow<'a, str>>,
     #[xml(flatten_text = "ap:TotalTime")]
@@ -90,9 +90,9 @@ pub struct OldOpenXmlApp<'a> {
     pub app_version: Option<Cow<'a, str>>,
 }
 
-impl Default for NewOpenXmlApp<'static> {
-    fn default() -> NewOpenXmlApp<'static> {
-        NewOpenXmlApp {
+impl Default for AppNoApNamespace<'static> {
+    fn default() -> AppNoApNamespace<'static> {
+        AppNoApNamespace {
             template: Some("Normal.dotm".into()),
             total_time: Some("1".into()),
             pages: Some("1".into()),
@@ -113,9 +113,9 @@ impl Default for NewOpenXmlApp<'static> {
     }
 }
 
-impl Default for OldOpenXmlApp<'static> {
-    fn default() -> OldOpenXmlApp<'static> {
-        OldOpenXmlApp {
+impl Default for AppWithApNamespace<'static> {
+    fn default() -> AppWithApNamespace<'static> {
+        AppWithApNamespace {
             template: Some("Normal.dotm".into()),
             total_time: Some("1".into()),
             pages: Some("1".into()),
@@ -136,9 +136,9 @@ impl Default for OldOpenXmlApp<'static> {
     }
 }
 
-impl<'a> XmlWrite for NewOpenXmlApp<'a> {
+impl<'a> XmlWrite for AppNoApNamespace<'a> {
     fn to_writer<W: Write>(&self, writer: &mut XmlWriter<W>) -> XmlResult<()> {
-        let NewOpenXmlApp {
+        let AppNoApNamespace {
             template,
             total_time,
             pages,
@@ -243,9 +243,9 @@ impl<'a> XmlWrite for NewOpenXmlApp<'a> {
     }
 }
 
-impl<'a> XmlWrite for OldOpenXmlApp<'a> {
+impl<'a> XmlWrite for AppWithApNamespace<'a> {
     fn to_writer<W: Write>(&self, writer: &mut XmlWriter<W>) -> XmlResult<()> {
-        let OldOpenXmlApp {
+        let AppWithApNamespace {
             template,
             total_time,
             pages,
