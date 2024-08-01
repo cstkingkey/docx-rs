@@ -192,8 +192,8 @@ __define_enum! {
         Margin= "margin",	//Page Margin
         Page = "page",//	Page Edge
         Paragraph= "paragraph",//	Paragraph
-        Line= "Line",//	Line
-        TopMargin= "toptMargin",//	Left Margin
+        Line= "line",//	Line
+        TopMargin= "topMargin",//	Left Margin
         BottomMargin= "bottomMargin",//	Right Margin
         InsideMargin= "insideMargin",//	Inside Margin
         OUtsideMargin= "outsideMargin",//	Outside Margin
