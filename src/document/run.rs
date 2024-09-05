@@ -108,20 +108,29 @@ impl<'a> Run<'a> {
         self
     }
 
-    pub fn iter_text(&self) -> impl Iterator<Item = &Cow<'a, str>> {
-        self.content.iter().filter_map(|content| match content {
-            RunContent::Text(Text { text, .. }) => Some(text),
-            RunContent::InstrText(InstrText { text, .. }) => Some(text),
-            RunContent::Break(_) => None,
-            RunContent::LastRenderedPageBreak(_) => None,
-            RunContent::FieldChar(_) => None,
-            RunContent::Separator(_) => None,
-            RunContent::ContinuationSeparator(_) => None,
-            RunContent::Tab(_) => None,
-            RunContent::CarriageReturn(_) => None,
-            RunContent::Drawing(_) => None,
-            _ => None,
-        })
+    pub fn text(&self) -> String {
+        self.iter_text()
+            .map(|c| c.to_string())
+            .collect::<Vec<_>>()
+            .join("")
+    }
+
+    pub fn iter_text(&self) -> Box<dyn Iterator<Item = &Cow<'a, str>> + '_> {
+        Box::new(
+            self.content.iter().filter_map(|content| match content {
+                RunContent::Text(Text { text, .. }) => Some(text),
+                RunContent::InstrText(InstrText { text, .. }) => Some(text),
+                RunContent::Break(_) => None,
+                RunContent::LastRenderedPageBreak(_) => None,
+                RunContent::FieldChar(_) => None,
+                RunContent::Separator(_) => None,
+                RunContent::ContinuationSeparator(_) => None,
+                RunContent::Tab(_) => None,
+                RunContent::CarriageReturn(_) => None,
+                RunContent::Drawing(_) => None,
+                _ => None,
+            })
+        )
     }
 
     pub fn iter_text_mut(&mut self) -> impl Iterator<Item = &mut Cow<'a, str>> {

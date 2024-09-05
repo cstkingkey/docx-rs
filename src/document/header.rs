@@ -48,6 +48,7 @@ impl<'a> Header<'a> {
                 BodyContent::SectionProperty(_) => {}
                 BodyContent::Sdt(_) => {}
                 BodyContent::TableCell(_) => {}
+                BodyContent::Run(_) => {}
             }
         }
         Ok(())

@@ -35,6 +35,23 @@ impl<'a> SDT<'a> {
     __setter!(property: Option<SDTProperty<'a>>);
     __setter!(end_property: Option<SDTEndProperty>);
     __setter!(content: Option<SDTContent<'a>>);
+
+    pub fn iter_text(&self) -> Box<dyn Iterator<Item = &Cow<'a, str>> + '_> {
+        Box::new(
+            self.content
+                .as_ref()
+                .map(|content| content.iter_text())
+                .into_iter()
+                .flatten()
+        )
+    }
+
+    pub fn text(&self) -> String {
+        self.iter_text()
+            .map(|c| c.to_string())
+            .collect::<Vec<_>>()
+            .join("")
+    }
 }
 
 /// Section Property
@@ -94,9 +111,41 @@ pub struct SDTContent<'a> {
         child = "w:tc",
         child = "w:tbl",
         child = "w:sectPr",
-        child = "w:sdt"
+        child = "w:sdt",
+        child = "w:r",
     )]
     pub content: Vec<BodyContent<'a>>,
+}
+
+impl<'a> SDTContent<'a> {
+    pub fn text(&self) -> String {
+        let v: Vec<_> = self.content
+            .iter()
+            .filter_map(|content| match content {
+                BodyContent::Paragraph(para) => Some(para.text()),
+                BodyContent::Table(_) => None,
+                BodyContent::SectionProperty(_) => None,
+                BodyContent::Sdt(sdt) => Some(sdt.text()),
+                BodyContent::TableCell(_) => None,
+                BodyContent::Run(run) => Some(run.text())
+            })
+            .collect();
+            v.join("\r\n")
+    }
+
+    pub fn iter_text(&self) -> Box<dyn Iterator<Item = &Cow<'a, str>> + '_> {
+        Box::new(
+            self.content.iter().filter_map(|content| match content {
+                BodyContent::Paragraph(para) => Some(para.iter_text()),
+                BodyContent::Table(_) => None,
+                BodyContent::SectionProperty(_) => None,
+                BodyContent::Sdt(sdt) => Some(sdt.iter_text()),
+                BodyContent::TableCell(_) => None,
+                BodyContent::Run(run) => Some(run.iter_text()),
+            })
+            .flatten()
+        )
+    }
 }
 
 __xml_test_suites!(SDT, SDT::default(), "<w:sdt/>",);

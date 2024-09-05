@@ -7,7 +7,7 @@ use crate::{
     __setter, __xml_test_suites,
     document::{
         BookmarkEnd, BookmarkStart, CommentRangeEnd, CommentRangeStart, Hyperlink, Run, RunContent,
-        Text,
+        Text, SDT,
     },
     formatting::ParagraphProperty,
 };
@@ -54,7 +54,8 @@ pub struct Paragraph<'a> {
         child = "w:r",
         child = "w:hyperlink",
         child = "w:bookmarkStart",
-        child = "w:bookmarkEnd"
+        child = "w:bookmarkEnd",
+        child = "w:sdt"
     )]
     pub content: Vec<ParagraphContent<'a>>,
 }
@@ -84,15 +85,18 @@ impl<'a> Paragraph<'a> {
             .join("")
     }
 
-    pub fn iter_text(&self) -> impl Iterator<Item = &Cow<'a, str>> {
-        self.content
-            .iter()
-            .filter_map(|content| match content {
-                ParagraphContent::Run(run) => Some(run.iter_text()),
-                ParagraphContent::Link(link) => Some(link.content.iter_text()),
-                _ => None,
-            })
-            .flatten()
+    pub fn iter_text(&self) -> Box<dyn Iterator<Item = &Cow<'a, str>> + '_> {
+        Box::new(
+            self.content
+                .iter()
+                .filter_map(|content| match content {
+                    ParagraphContent::Run(run) => Some(run.iter_text()),
+                    ParagraphContent::Link(link) => Some(link.content.iter_text()),
+                    ParagraphContent::SDT(sdt) => Some(sdt.iter_text()),
+                    _ => None,
+                })
+                .flatten()
+        )
     }
 
     pub fn iter_text_mut(&mut self) -> impl Iterator<Item = &mut Cow<'a, str>> {
@@ -140,6 +144,8 @@ pub enum ParagraphContent<'a> {
     BookmarkStart(BookmarkStart<'a>),
     #[xml(tag = "w:bookmarkEnd")]
     BookmarkEnd(BookmarkEnd<'a>),
+    #[xml(tag = "w:sdt")]
+    SDT(SDT<'a>),
 }
 
 __xml_test_suites!(
