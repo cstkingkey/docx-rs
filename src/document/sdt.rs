@@ -42,7 +42,7 @@ impl<'a> SDT<'a> {
                 .as_ref()
                 .map(|content| content.iter_text())
                 .into_iter()
-                .flatten()
+                .flatten(),
         )
     }
 
@@ -112,7 +112,7 @@ pub struct SDTContent<'a> {
         child = "w:tbl",
         child = "w:sectPr",
         child = "w:sdt",
-        child = "w:r",
+        child = "w:r"
     )]
     pub content: Vec<BodyContent<'a>>,
 }
@@ -127,15 +127,17 @@ impl<'a> SDTContent<'a> {
 
     pub fn iter_text(&self) -> Box<dyn Iterator<Item = &Cow<'a, str>> + '_> {
         Box::new(
-            self.content.iter().filter_map(|content| match content {
-                BodyContent::Paragraph(para) => Some(para.iter_text()),
-                BodyContent::Table(_) => None,
-                BodyContent::SectionProperty(_) => None,
-                BodyContent::Sdt(sdt) => Some(sdt.iter_text()),
-                BodyContent::TableCell(_) => None,
-                BodyContent::Run(run) => Some(run.iter_text()),
-            })
-            .flatten()
+            self.content
+                .iter()
+                .filter_map(|content| match content {
+                    BodyContent::Paragraph(para) => Some(para.iter_text()),
+                    BodyContent::Table(_) => None,
+                    BodyContent::SectionProperty(_) => None,
+                    BodyContent::Sdt(sdt) => Some(sdt.iter_text()),
+                    BodyContent::TableCell(_) => None,
+                    BodyContent::Run(run) => Some(run.iter_text()),
+                })
+                .flatten(),
         )
     }
 }

@@ -95,7 +95,7 @@ impl<'a> Paragraph<'a> {
                     ParagraphContent::SDT(sdt) => Some(sdt.iter_text()),
                     _ => None,
                 })
-                .flatten()
+                .flatten(),
         )
     }
 

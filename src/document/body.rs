@@ -2,7 +2,7 @@ use derive_more::From;
 use hard_xml::{XmlRead, XmlWrite};
 
 use crate::__xml_test_suites;
-use crate::document::{Paragraph, Table, TableCell, Run};
+use crate::document::{Paragraph, Run, Table, TableCell};
 use crate::formatting::SectionProperty;
 
 use super::SDT;
