@@ -119,18 +119,10 @@ pub struct SDTContent<'a> {
 
 impl<'a> SDTContent<'a> {
     pub fn text(&self) -> String {
-        let v: Vec<_> = self.content
-            .iter()
-            .filter_map(|content| match content {
-                BodyContent::Paragraph(para) => Some(para.text()),
-                BodyContent::Table(_) => None,
-                BodyContent::SectionProperty(_) => None,
-                BodyContent::Sdt(sdt) => Some(sdt.text()),
-                BodyContent::TableCell(_) => None,
-                BodyContent::Run(run) => Some(run.text())
-            })
-            .collect();
-            v.join("\r\n")
+        self.iter_text()
+            .map(|c| c.to_string())
+            .collect::<Vec<_>>()
+            .join("")
     }
 
     pub fn iter_text(&self) -> Box<dyn Iterator<Item = &Cow<'a, str>> + '_> {
