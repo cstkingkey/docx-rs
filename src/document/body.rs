@@ -35,7 +35,7 @@ impl<'a> Body<'a> {
                 BodyContent::SectionProperty(_) => None,
                 BodyContent::Sdt(sdt) => Some(sdt.text()),
                 BodyContent::TableCell(_) => None,
-                BodyContent::Run(run) => Some(run.text()),
+                BodyContent::Run(_) => None,
             })
             .collect();
         v.join("\r\n")
