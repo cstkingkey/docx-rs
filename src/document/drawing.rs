@@ -267,8 +267,9 @@ pub struct Graphic<'a> {
 pub struct GraphicData<'a> {
     #[xml(default, attr = "uri")]
     pub uri: Cow<'a, str>,
+    // graphic data can have any element in any namespace as a child
     #[xml(child = "pic:pic")]
-    pub pic: Picture<'a>,
+    pub children: Vec<Picture<'a>>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
