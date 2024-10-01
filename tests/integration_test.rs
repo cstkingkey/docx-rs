@@ -115,14 +115,17 @@ fn read_image() {
 
                                             if let Some(graphic) = inline.graphic {
                                                 if let Some(cnvpr) =
-                                                    graphic.data.pic.nv_pic_pr.c_nv_pr
+                                                    &graphic.data.children[0].nv_pic_pr.c_nv_pr
                                                 {
-                                                    assert_eq!("lalune.jpg", cnvpr.descr.unwrap());
+                                                    assert_eq!(
+                                                        "lalune.jpg",
+                                                        cnvpr.clone().descr.unwrap()
+                                                    );
                                                     assert_eq!(22, cnvpr.id.unwrap());
                                                 }
                                                 assert_eq!(
                                                     "rId20",
-                                                    graphic.data.pic.fill.blip.embed
+                                                    graphic.data.children[0].fill.blip.embed
                                                 );
                                                 if let Some(relationships) = &docx.document_rels {
                                                     if let Some(target) =
