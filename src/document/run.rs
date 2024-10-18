@@ -1,7 +1,7 @@
 #![allow(unused_must_use)]
 use derive_more::From;
 use hard_xml::{XmlRead, XmlWrite};
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 
 use crate::{
     __setter, __xml_test_suites,
@@ -151,22 +151,21 @@ impl<'a> Run<'a> {
     where
         S: AsRef<str>,
     {
-        let dic = (old, new);
-        let dic = vec![dic];
-        self.replace_text(&dic);
+        self.replace_text(&[(old, new)]);
     }
 
-    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> DocxResult<()>
+    pub fn replace_text<'b, I, T, S>(&mut self, dic: T) -> DocxResult<()>
     where
         S: AsRef<str> + 'b,
-        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+        T: IntoIterator<Item = I> + Copy,
+        I: Borrow<(S, S)>,
     {
         for c in self.content.iter_mut() {
             match c {
                 RunContent::Text(t) => {
                     let mut tc = t.text.to_string();
                     for p in dic {
-                        tc = tc.replace(p.0.as_ref(), p.1.as_ref());
+                        tc = tc.replace(p.borrow().0.as_ref(), p.borrow().1.as_ref());
                     }
                     t.text = tc.into();
                 }

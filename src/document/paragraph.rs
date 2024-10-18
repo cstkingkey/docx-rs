@@ -1,7 +1,7 @@
 #![allow(unused_must_use)]
 use derive_more::From;
 use hard_xml::{XmlRead, XmlWrite};
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 
 use crate::{
     __setter, __xml_test_suites,
@@ -110,10 +110,11 @@ impl<'a> Paragraph<'a> {
             .flatten()
     }
 
-    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    pub fn replace_text<'b, I, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
     where
         S: AsRef<str> + 'b,
-        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+        T: IntoIterator<Item = I> + Copy,
+        I: Borrow<(S, S)>,
     {
         for content in self.content.iter_mut() {
             match content {

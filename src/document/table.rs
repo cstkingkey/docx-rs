@@ -1,6 +1,6 @@
 #![allow(unused_must_use)]
 use hard_xml::{XmlRead, XmlWrite};
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 
 use crate::{
     __setter, __xml_test_suites,
@@ -48,10 +48,11 @@ impl<'a> Table<'a> {
             .flat_map(|content| content.iter_text_mut())
     }
 
-    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    pub fn replace_text<'b, I, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
     where
         S: AsRef<str> + 'b,
-        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+        T: IntoIterator<Item = I> + Copy,
+        I: Borrow<(S, S)>,
     {
         for row in self.rows.iter_mut() {
             row.replace_text(dic)?;

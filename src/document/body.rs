@@ -1,5 +1,6 @@
 use derive_more::From;
 use hard_xml::{XmlRead, XmlWrite};
+use std::borrow::Borrow;
 
 use crate::__xml_test_suites;
 use crate::document::{Paragraph, Run, Table, TableCell};
@@ -45,15 +46,14 @@ impl<'a> Body<'a> {
     where
         S: AsRef<str>,
     {
-        let dic = (old, new);
-        let dic = vec![dic];
-        let _d = self.replace_text(&dic);
+        let _d = self.replace_text(&[(old, new)]);
     }
 
-    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    pub fn replace_text<'b, I, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
     where
         S: AsRef<str> + 'b,
-        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+        T: IntoIterator<Item = I> + Copy,
+        I: Borrow<(S, S)>,
     {
         for content in self.content.iter_mut() {
             match content {

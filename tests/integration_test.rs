@@ -1,11 +1,12 @@
 extern crate docx_rust;
-use std::fs::read_dir;
 
 use docx_rust::{
     document::{BodyContent, ParagraphContent, RunContent},
     rels::TargetMode,
     DocxFile,
 };
+use std::collections::HashMap;
+use std::fs::read_dir;
 
 #[test]
 fn read_and_replace() {
@@ -17,6 +18,32 @@ fn read_and_replace() {
 
     let path2 = std::path::Path::new("./tests/bbb/aa.docx");
     let _d = docx.write_file(path2).unwrap();
+}
+
+#[test]
+fn replace_text_multiple() {
+    // reader
+    let path = std::path::Path::new("./tests/aaa/aa.docx");
+    let book = DocxFile::from_file(path).unwrap();
+    let mut docx = book.parse().unwrap();
+
+    let map = HashMap::from([("好日子", "好天气")]);
+    docx.document.body.replace_text(&map).unwrap();
+
+    let map = HashMap::from([("好日子".to_string(), "好天气".to_string())]);
+    docx.document.body.replace_text(&map).unwrap();
+
+    let slice = [("好日子", "好天气")];
+    docx.document.body.replace_text(&slice).unwrap();
+
+    let slice = [("好日子".to_string(), "好天气".to_string())];
+    docx.document.body.replace_text(&slice).unwrap();
+
+    let vec = vec![("好日子", "好天气")];
+    docx.document.body.replace_text(&vec).unwrap();
+
+    let vec = vec![("好日子".to_string(), "好天气".to_string())];
+    docx.document.body.replace_text(&vec).unwrap();
 }
 
 #[test]

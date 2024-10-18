@@ -4,6 +4,7 @@
 //!
 
 use hard_xml::{XmlRead, XmlResult, XmlWrite, XmlWriter};
+use std::borrow::Borrow;
 use std::io::Write;
 
 use crate::__xml_test_suites;
@@ -29,15 +30,14 @@ impl<'a> Header<'a> {
     where
         S: AsRef<str>,
     {
-        let dic = (old, new);
-        let dic = vec![dic];
-        let _d = self.replace_text(&dic);
+        let _d = self.replace_text(&[(old, new)]);
     }
 
-    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    pub fn replace_text<'b, I, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
     where
         S: AsRef<str> + 'b,
-        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+        T: IntoIterator<Item = I> + Copy,
+        I: Borrow<(S, S)>,
     {
         for content in self.content.iter_mut() {
             match content {

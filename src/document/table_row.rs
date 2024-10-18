@@ -1,5 +1,5 @@
 #![allow(unused_must_use)]
-use std::borrow::Cow;
+use std::borrow::{Borrow, Cow};
 
 use super::SDT;
 
@@ -83,10 +83,11 @@ impl<'a> TableRow<'a> {
             .flatten()
     }
 
-    pub fn replace_text<'b, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
+    pub fn replace_text<'b, I, T, S>(&mut self, dic: T) -> crate::DocxResult<()>
     where
         S: AsRef<str> + 'b,
-        T: IntoIterator<Item = &'b (S, S)> + std::marker::Copy,
+        T: IntoIterator<Item = I> + Copy,
+        I: Borrow<(S, S)>,
     {
         for cell in self.cells.iter_mut() {
             if let TableRowContent::TableCell(c) = cell {
