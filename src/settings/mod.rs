@@ -7,7 +7,7 @@ use hard_xml::{XmlRead, XmlResult, XmlWrite, XmlWriter};
 use std::borrow::Cow;
 use std::io::Write;
 
-use crate::schema::{SCHEMA_MAIN, SCHEMA_WORDML_14};
+use crate::schema::{SCHEMA_MAIN, SCHEMA_RELATIONSHIPS_DOCUMENT, SCHEMA_WORDML_14};
 use crate::{__string_enum, __xml_test_suites, write_attr};
 
 /// The root element of the main document part.
@@ -1241,6 +1241,8 @@ impl<'a> XmlWrite for Settings<'a> {
 
         writer.write_element_start("w:settings")?;
 
+        writer.write_attribute("xmlns:r", SCHEMA_RELATIONSHIPS_DOCUMENT)?;
+
         writer.write_attribute("xmlns:w", SCHEMA_MAIN)?;
 
         writer.write_attribute("xmlns:w14", SCHEMA_WORDML_14)?;
@@ -1355,8 +1357,9 @@ __xml_test_suites!(
     Settings,
     Settings::default(),
     format!(
-        r#"{}<w:settings xmlns:w="{}" xmlns:w14="{}"></w:settings>"#,
+        r#"{}<w:settings xmlns:r="{}" xmlns:w="{}" xmlns:w14="{}"></w:settings>"#,
         crate::schema::SCHEMA_XML,
+        SCHEMA_RELATIONSHIPS_DOCUMENT,
         SCHEMA_MAIN,
         SCHEMA_WORDML_14
     )
