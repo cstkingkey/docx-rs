@@ -24,7 +24,7 @@ pub struct FootNotes<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:footnote")]
 pub struct FootNote<'a> {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:type")]
     pub ty: Option<NoteSeparator>,
     #[xml(attr = "w:id")]
     pub id: Option<isize>,
@@ -87,12 +87,14 @@ impl<'a> XmlWrite for FootNotes<'a> {
 pub enum NoteSeparator {
     Separator,
     ContinuationSeparator,
+    ContinuationNotice,
 }
 
 __string_enum! {
     NoteSeparator {
         Separator = "separator",
         ContinuationSeparator = "continuationSeparator",
+        ContinuationNotice = "continuationNotice",
     }
 }
 

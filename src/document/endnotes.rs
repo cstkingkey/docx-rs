@@ -26,7 +26,7 @@ pub struct EndNotes<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:endnote")]
 pub struct EndNote<'a> {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:type")]
     pub ty: Option<NoteSeparator>,
     #[xml(attr = "w:id")]
     pub id: Option<isize>,
