@@ -47,6 +47,7 @@ pub struct Docx<'a> {
     pub rels: Relationships<'a>,
     /// Specifies the part-level relationship to the main document part
     pub document_rels: Option<Relationships<'a>>,
+    pub settings_rels: Option<Relationships<'a>>,
     pub headers: HashMap<String, Header<'a>>,
     pub footers: HashMap<String, Footer<'a>>,
     pub themes: HashMap<String, Theme<'a>>,
@@ -188,6 +189,7 @@ impl<'a> Docx<'a> {
             Some(self.comments)       => "word/comments.xml"
             Some(self.numbering)      => "word/numbering.xml"
             Some(self.document_rels)  => "word/_rels/document.xml.rels"
+            Some(self.settings_rels)  => "word/_rels/settings.xml.rels"
         );
 
         for hd in self.headers.iter() {
@@ -239,6 +241,7 @@ pub struct DocxFile {
     core: Option<String>,
     document: String,
     document_rels: Option<String>,
+    settings_rels: Option<String>,
     font_table: Option<String>,
     rels: String,
     styles: Option<String>,
@@ -322,6 +325,7 @@ impl DocxFile {
         let content_types = read!(ContentTypes, "[Content_Types].xml");
         let core = option_read!(Core, "docProps/core.xml");
         let document_rels = option_read!(Relationships, "word/_rels/document.xml.rels");
+        let settings_rels = option_read!(Relationships, "word/_rels/settings.xml.rels");
         let document = read!(Document, "word/document.xml");
         let font_table = option_read!(FontTable, "word/fontTable.xml");
         let rels = read!(Relationships, "_rels/.rels");
@@ -343,6 +347,7 @@ impl DocxFile {
             content_types,
             core,
             document_rels,
+            settings_rels,
             document,
             font_table,
             rels,
@@ -448,6 +453,12 @@ impl DocxFile {
             Relationships { relationships: rrr }
         });
 
+        let settings_rels = self
+            .settings_rels
+            .as_deref()
+            .map(Relationships::from_str)
+            .transpose()?;
+
         let font_table = if let Some(content) = &self.font_table {
             Some(FontTable::from_str(content)?)
         } else {
@@ -523,6 +534,7 @@ impl DocxFile {
             core,
             document,
             document_rels,
+            settings_rels,
             font_table,
             rels,
             styles,
