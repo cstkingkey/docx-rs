@@ -313,6 +313,16 @@ pub struct ScrgbClr {
 pub struct SrgbClr {
     #[xml(attr = "val")]
     pub value: Option<String>,
+    #[xml(child = "a:alpha")]
+    pub alpha: Option<Alpha>,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:alpha")]
+pub struct Alpha {
+    #[xml(attr = "val")]
+    pub value: usize,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -414,6 +424,46 @@ __string_enum! {
 pub struct SchemeClr {
     #[xml(attr = "val")]
     pub val: SchemeClrType,
+    #[xml(child = "a:lumMod")]
+    pub lum_mod: Option<LuminanceModulation>,
+    #[xml(child = "a:satMod")]
+    pub sat_mod: Option<SaturationModulation>,
+    #[xml(child = "a:tint")]
+    pub tint: Option<Tint>,
+    #[xml(child = "a:shade")]
+    pub shade: Option<Shade>,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:lumMod")]
+pub struct LuminanceModulation {
+    #[xml(attr = "val")]
+    pub val: isize,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:satMod")]
+pub struct SaturationModulation {
+    #[xml(attr = "val")]
+    pub val: isize,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:tint")]
+pub struct Tint {
+    #[xml(attr = "val")]
+    pub val: isize,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:shade")]
+pub struct Shade {
+    #[xml(attr = "val")]
+    pub val: isize,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -929,7 +979,7 @@ pub struct FmtScheme<'a> {
     #[xml(child = "a:fillStyleLst")]
     pub fill_style_lst: FillStyleLst,
     #[xml(child = "a:lnStyleLst")]
-    pub in_style_lst: InStyleLst,
+    pub in_style_lst: LineStyleList,
     #[xml(child = "a:effectStyleLst")]
     pub effect_style_lst: EffectStyleLst,
     #[xml(child = "a:bgFillStyleLst")]
@@ -940,7 +990,7 @@ __define_struct_vec! {
     ("a:fillStyleLst", FillStyleLst, FillStyleLstChoice) {} {
         "a:noFill", NoFill    //No Fill
         "a:solidFill", SolidFill    //Solid Fill
-        //"a:gradFill", gradFill    //Gradient Fill
+        "a:gradFill", GradFill    //Gradient Fill
         //"a:blipFill", blipFill    //Picture Fill
         //"a:pattFill", pattFill    //Pattern Fill
         "a:grpFill", GrpFill    //Group Fill
@@ -972,19 +1022,229 @@ __define_struct_vec! {
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:gradFill")]
+pub struct GradFill {
+    #[xml(attr = "rotWithShape")]
+    pub rotate_with_shape: bool,
+    #[xml(child = "a:lin")]
+    pub linear_gradient_fill: Option<LinearGradientFill>,
+    #[xml(child = "a:gsLst")]
+    pub gradient_stop_list: Option<GradientStopList>,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:gsLst")]
+pub struct GradientStopList {
+    #[xml(child = "a:gs")]
+    pub gradient_stop: Vec<GradientStop>,
+}
+
+__define_struct_vec! {
+    ("a:gs", GradientStop, GradientStopChoice) {
+        "pos", position, isize
+    } {
+        "a:scrgbClr", ScrgbClr
+        "a:srgbClr", SrgbClr
+        "a:hslClr", HslClr
+        "a:sysClr", SysClr
+        "a:schemeClr", SchemeClr
+        "a:prstClr", PrstClr
+    }
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:lin")]
+pub struct LinearGradientFill {
+    #[xml(attr = "ang")]
+    pub angle: isize,
+    #[xml(attr = "scaled")]
+    pub scaled: bool,
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:lnStyleLst")]
-pub struct InStyleLst {}
+pub struct LineStyleList {
+    #[xml(child = "a:ln")]
+    pub outline: Vec<Outline>,
+}
+
+__define_struct_vec! {
+    ("a:ln", Outline, OutlineChoice) {
+        "w", line_with, isize
+        "cap", cap, CapType
+        "cmpd", cmpd, CompoundLineType
+        "algn", algn, PenAlignment
+    } {
+        "a:solidFill", SolidFill
+        "a:prstDash", PresetDash
+        "a:miter", MiterLineJoin
+    }
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:prstDash")]
+pub struct PresetDash {
+    #[xml(attr = "val")]
+    pub val: PresetDashType,
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum PresetDashType {
+    #[default]
+    Solid,
+    Dot,
+    Dash,
+    LargeDash,
+    LargeDashDot,
+    LargeDashDotDot,
+    SystemDot,
+    SystemDash,
+    SystemDashDot,
+    SystemDashDotDot,
+}
+
+__string_enum! {
+    PresetDashType {
+        Solid = "solid",
+        Dot = "dot",
+        Dash = "dash",
+        LargeDash = "lgDash",
+        LargeDashDot = "lgDashDot",
+        LargeDashDotDot = "lgDashDotDot",
+        SystemDot = "sysDot",
+        SystemDash = "sysDash",
+        SystemDashDot = "sysDashDot",
+        SystemDashDotDot = "sysDashDotDot",
+    }
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:miter")]
+pub struct MiterLineJoin {
+    #[xml(attr = "lim")]
+    pub limit: isize,
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum PenAlignment {
+    #[default]
+    Center,
+    Insert,
+}
+
+__string_enum! {
+    PenAlignment {
+        Center = "ctr",
+        Insert = "in",
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum CapType {
+    #[default]
+    Square,
+    Round,
+    Flat,
+}
+
+__string_enum! {
+    CapType {
+        Square = "sq",
+        Round = "rnd",
+        Flat = "flat",
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum CompoundLineType {
+    #[default]
+    Single,
+    Double,
+    ThickThin,
+    ThinThick,
+    Triple,
+}
+
+__string_enum! {
+    CompoundLineType {
+        Single = "sng",
+        Double = "dbl",
+        ThickThin = "thickThin",
+        ThinThick = "thinThick",
+        Triple = "tri",
+    }
+}
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:effectStyleLst")]
-pub struct EffectStyleLst {}
+pub struct EffectStyleLst {
+    #[xml(child = "a:effectStyle")]
+    pub effect_styles: Vec<EffectStyle>,
+}
+
+__define_struct_vec! {
+    ("a:effectStyle", EffectStyle, EffectStyleChoice) {} {
+        "a:effectLst", EffectList
+    }
+}
+
+__define_struct_vec! {
+    ("a:effectLst", EffectList, EffectListChoice) {} {
+        "a:outerShdw", OuterShadow
+        // "a:prstShdw", PresetShadow
+        // "a:reflection", Reflection
+        // "a:softEdge", SoftEdge
+        // "a:glow", Glow
+    }
+}
+
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:outerShdw")]
+pub struct OuterShadow {
+    #[xml(attr = "blurRad")]
+    pub blur_radius: Option<isize>,
+    #[xml(attr = "dist")]
+    pub distance: Option<isize>,
+    #[xml(attr = "dir")]
+    pub direction: Option<isize>,
+    #[xml(attr = "algn")]
+    pub alignment: Option<PenAlignment>,
+    #[xml(attr = "kx")]
+    pub kx: Option<isize>,
+    #[xml(attr = "ky")]
+    pub ky: Option<isize>,
+    #[xml(attr = "rotWithShape")]
+    pub rotate_with_shape: Option<bool>,
+    #[xml(child = "a:hslClr")]
+    pub hsl_color: Option<HslClr>,
+    #[xml(child = "a:prstClr")]
+    pub prst_color: Option<PrstClr>,
+    #[xml(child = "a:schemeClr")]
+    pub scheme_color: Option<SchemeClr>,
+    #[xml(child = "a:scrgbClr")]
+    pub scrgb_color: Option<ScrgbClr>,
+    #[xml(child = "a:srgbClr")]
+    pub srgb_color: Option<SrgbClr>,
+    #[xml(child = "a:sysClr")]
+    pub sys_color: Option<SysClr>,
+}
 
 __define_struct_vec! {
     ("a:bgFillStyleLst", BgFillStyleLst, BgFillStyleLstChoice) {} {
         "a:noFill", NoFill    //No Fill
         "a:solidFill", SolidFill    //Solid Fill
-        //"a:gradFill", gradFill    //Gradient Fill
+        "a:gradFill", GradFill    //Gradient Fill
         //"a:blipFill", blipFill    //Picture Fill
         //"a:pattFill", pattFill    //Pattern Fill
         "a:grpFill", GrpFill    //Group Fill
