@@ -1,3 +1,7 @@
+#[cfg(feature = "async")]
+use async_zip::{Compression, ZipEntryBuilder};
+#[cfg(feature = "async")]
+use futures_io::{AsyncBufRead, AsyncWrite};
 use hard_xml::{XmlRead, XmlWrite, XmlWriter};
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -238,6 +242,175 @@ impl<'a> Docx<'a> {
         }
         let file = File::create(path)?;
         self.write(file)
+    }
+}
+
+#[cfg(feature = "async")]
+impl<'a> Docx<'a> {
+    pub async fn write_async<W: AsyncWrite + Unpin>(&'a mut self, writer: W) -> DocxResult<W> {
+        use async_zip::base::write::ZipFileWriter;
+
+        let mut writer = ZipFileWriter::new(writer);
+
+        // ==== Add Relationships ====
+
+        if self.app.is_some() {
+            self.rels.add_rel(SCHEMA_REL_EXTENDED, "docProps/app.xml");
+        }
+
+        if self.core.is_some() {
+            self.rels.add_rel(SCHEMA_CORE, "docProps/core.xml");
+        }
+
+        self.rels
+            .add_rel(SCHEMA_OFFICE_DOCUMENT, "word/document.xml");
+
+        self.document_rels
+            .get_or_insert(Relationships::default())
+            .add_rel(SCHEMA_STYLES, "styles.xml");
+
+        if self.font_table.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_FONT_TABLE, "fontTable.xml");
+        }
+
+        if self.footnotes.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_FOOTNOTES, "footnotes.xml");
+        }
+
+        if self.endnotes.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_ENDNOTES, "endnotes.xml");
+        }
+
+        if self.settings.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_SETTINGS, "settings.xml");
+        }
+
+        if self.web_settings.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_WEB_SETTINGS, "webSettings.xml");
+        }
+
+        if self.comments.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_COMMENTS, "comments.xml");
+        }
+
+        if self.numbering.is_some() {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_NUMBERING, "numbering.xml");
+        }
+
+        for hd in &self.headers {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_HEADER, hd.0);
+        }
+
+        for ft in &self.footers {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_HEADER, ft.0);
+        }
+
+        for theme in &self.themes {
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(SCHEMA_THEME, theme.0);
+        }
+
+        for media in &self.media {
+            let rel = crate::media::get_media_type_relation_type(&media.1 .0);
+            self.document_rels
+                .get_or_insert(Relationships::default())
+                .add_rel(rel, media.0);
+        }
+
+        // ==== Write Zip Item ====
+
+        macro_rules! write_xml {
+            (Some($xml:expr) => $name:tt) => {
+                if let Some(ref xml) = $xml {
+                    write_xml!(xml => $name);
+                }
+            };
+            (Some($xml:expr) => $name:tt $($rest:tt)*) => {
+                write_xml!(Some($xml) => $name);
+                write_xml!($($rest)*);
+            };
+            ($xml:expr => $name:tt) => {
+                let mut buf = XmlWriter::new(Vec::new());
+                $xml.to_writer(&mut buf)?;
+                let opt = ZipEntryBuilder::new(($name.as_ref() as &str).into(), Compression::Deflate);
+                writer.write_entry_whole(opt, &buf.into_inner()).await?;
+            };
+            ($xml:expr => $name:tt $($rest:tt)*) => {
+                write_xml!($xml => $name);
+                write_xml!($($rest)*);
+            };
+        }
+
+        write_xml!(
+            self.content_types        => "[Content_Types].xml"
+            Some(self.app)            => "docProps/app.xml"
+            Some(self.core)           => "docProps/core.xml"
+            self.rels                 => "_rels/.rels"
+            self.document             => "word/document.xml"
+            self.styles               => "word/styles.xml"
+            Some(self.font_table)     => "word/fontTable.xml"
+            Some(self.footnotes)      => "word/footnotes.xml"
+            Some(self.endnotes)       => "word/endnotes.xml"
+            Some(self.settings)       => "word/settings.xml"
+            Some(self.web_settings)   => "word/webSettings.xml"
+            Some(self.comments)       => "word/comments.xml"
+            Some(self.numbering)      => "word/numbering.xml"
+            Some(self.document_rels)  => "word/_rels/document.xml.rels"
+            Some(self.settings_rels)  => "word/_rels/settings.xml.rels"
+        );
+
+        for (filename, content) in self.headers.iter() {
+            let file_path = format!("word/{}", filename);
+            write_xml!(
+                content => file_path
+            );
+        }
+
+        for (filename, content) in self.footers.iter() {
+            let file_path = format!("word/{}", filename);
+            write_xml!(
+                content => file_path
+            );
+        }
+
+        for (filename, content) in self.themes.iter() {
+            let file_path = format!("word/{}", filename);
+            write_xml!(
+                content => file_path
+            );
+        }
+
+        for (filename, (_, content)) in self.media.iter() {
+            let file_path = format!("word/{}", filename);
+            let opt = ZipEntryBuilder::new(file_path.as_str().into(), Compression::Deflate);
+            writer.write_entry_whole(opt, content).await?;
+        }
+
+        for (file_path, content) in &self.custom_xml {
+            let opt = ZipEntryBuilder::new(file_path.as_str().into(), Compression::Deflate);
+            writer.write_entry_whole(opt, &content).await?;
+        }
+
+        Ok(writer.close().await?)
     }
 }
 
@@ -566,5 +739,95 @@ impl DocxFile {
             numbering,
             custom_xml,
         })
+    }
+}
+
+#[cfg(feature = "async")]
+impl DocxFile {
+    #[inline]
+    pub async fn from_async_reader<T: AsyncBufRead + Unpin>(reader: T) -> DocxResult<Self> {
+        use async_zip::base::read::stream::ZipFileReader;
+        let mut reader = ZipFileReader::new(reader);
+
+        let mut docx = DocxFile {
+            app: None,
+            content_types: String::new(),
+            core: None,
+            document: String::new(),
+            document_rels: None,
+            settings_rels: None,
+            font_table: None,
+            rels: String::new(),
+            styles: None,
+            settings: None,
+            web_settings: None,
+            headers: vec![],
+            footers: vec![],
+            themes: vec![],
+            medias: vec![],
+            footnotes: None,
+            endnotes: None,
+            comments: None,
+            numbering: None,
+            custom_xml: vec![],
+        };
+
+        while let Some(mut next) = reader.next_with_entry().await? {
+            let entry_reader = next.reader_mut();
+            let filename = entry_reader.entry().filename().as_str()?.to_string();
+
+            macro_rules! read_to_string {
+                ($field:expr) => {{
+                    let mut buffer = String::new();
+                    entry_reader.read_to_string_checked(&mut buffer).await?;
+                    $field = buffer.into();
+                }};
+            }
+
+            macro_rules! read_multiple_to_string {
+                ($field:expr) => {{
+                    let mut buffer = String::new();
+                    entry_reader.read_to_string_checked(&mut buffer).await?;
+                    $field.push((filename, buffer));
+                }};
+            }
+
+            macro_rules! read_multiple_to_bytes {
+                ($field:expr) => {{
+                    let mut buffer = Vec::new();
+                    entry_reader.read_to_end_checked(&mut buffer).await?;
+                    $field.push((filename, buffer));
+                }};
+            }
+
+            match filename.as_str() {
+                "docProps/app.xml" => read_to_string!(docx.app),
+                "[Content_Types].xml" => read_to_string!(docx.content_types),
+                "docProps/core.xml" => read_to_string!(docx.core),
+                "word/_rels/document.xml.rels" => read_to_string!(docx.document_rels),
+                "word/_rels/settings.xml.rels" => read_to_string!(docx.settings_rels),
+                "word/document.xml" => read_to_string!(docx.document),
+                "word/fontTable.xml" => read_to_string!(docx.font_table),
+                "_rels/.rels" => read_to_string!(docx.rels),
+                "word/styles.xml" => read_to_string!(docx.styles),
+                "word/settings.xml" => read_to_string!(docx.settings),
+                "word/webSettings.xml" => read_to_string!(docx.web_settings),
+                "word/footnotes.xml" => read_to_string!(docx.footnotes),
+                "word/endnotes.xml" => read_to_string!(docx.endnotes),
+                "word/comments.xml" => read_to_string!(docx.comments),
+                "word/numbering.xml" => read_to_string!(docx.numbering),
+                _ if filename.contains("word/header") => read_multiple_to_string!(docx.headers),
+                _ if filename.contains("word/footer") => read_multiple_to_string!(docx.footers),
+                _ if filename.contains("word/theme/theme") => {
+                    read_multiple_to_string!(docx.footers)
+                }
+                _ if filename.contains("word/media") => read_multiple_to_bytes!(docx.medias),
+                _ if filename.contains("custom") => read_multiple_to_bytes!(docx.custom_xml),
+                _ => {}
+            }
+            reader = next.skip().await?;
+        }
+
+        Ok(docx)
     }
 }

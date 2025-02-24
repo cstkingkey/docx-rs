@@ -13,6 +13,9 @@ pub enum DocxError {
     Xml(#[from] XmlError),
     #[error("unable to unpack file: {0}")]
     Zip(#[from] ZipError),
+    #[cfg(feature = "async")]
+    #[error("unable to unpack file: {0}")]
+    AsyncZip(#[from] async_zip::error::ZipError),
 }
 
 /// Specialized `Result` which the error value is `DocxError`.

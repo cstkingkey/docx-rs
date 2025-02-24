@@ -183,3 +183,19 @@ fn read_image() {
         }
     }
 }
+
+#[tokio::test]
+#[cfg(feature = "async")]
+async fn read_write_async() {
+    use tokio::fs::File;
+    use tokio::io::BufReader;
+    use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
+
+    let file = File::open("./tests/aaa/aa.docx").await.unwrap();
+    let reader = BufReader::new(file);
+    let book = DocxFile::from_async_reader(reader.compat()).await.unwrap();
+    let mut docx = book.parse().unwrap();
+
+    let writer = Vec::new();
+    let _ = docx.write_async(writer.compat_write()).await.unwrap();
+}

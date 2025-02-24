@@ -15,6 +15,14 @@ log = "0.4.14"
 hard-xml = "1.27.0"
 zip = {version = "1.1.2", default-features = false, features = ["deflate"]}
 thiserror = "1"
+async_zip = { version = "0.0.17", default-features = false, features = ["deflate"], optional = true }
+futures-io = { version = "0.3.31" , optional = true}
 
 [dev-dependencies]
 env_logger = "0.11.3"
+tokio = { version = "1.43.0" , features = ["macros", "rt", "fs", "io-util"]}
+tokio-util = { version = "0.7.13", features = ["compat"] }
+
+
+[features]
+async = ["dep:async_zip", "dep:futures-io"]
