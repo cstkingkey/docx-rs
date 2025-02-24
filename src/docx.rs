@@ -1,4 +1,5 @@
 use hard_xml::{XmlRead, XmlWrite, XmlWriter};
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
@@ -58,6 +59,7 @@ pub struct Docx<'a> {
     pub web_settings: Option<WebSettings>,
     pub comments: Option<Comments<'a>>,
     pub numbering: Option<Numbering<'a>>,
+    pub custom_xml: HashMap<String, Cow<'a, [u8]>>,
 }
 
 impl<'a> Docx<'a> {
@@ -222,6 +224,11 @@ impl<'a> Docx<'a> {
             writer.inner.write_all(media.1 .1)?;
         }
 
+        for (file_path, content) in &self.custom_xml {
+            writer.inner.start_file(file_path.clone(), opt)?;
+            writer.inner.write_all(content)?;
+        }
+
         Ok(writer.inner.finish()?)
     }
 
@@ -255,6 +262,7 @@ pub struct DocxFile {
     endnotes: Option<String>,
     comments: Option<String>,
     numbering: Option<String>,
+    custom_xml: Vec<(String, Vec<u8>)>,
 }
 
 impl DocxFile {
@@ -341,6 +349,7 @@ impl DocxFile {
         let footers = option_read_multiple!(Footers, "word/footer");
         let themes = option_read_multiple!(Themes, "word/theme/theme");
         let medias = option_read_multiple_files!(Medias, "word/media");
+        let custom_xml = option_read_multiple_files!(_, "custom");
 
         Ok(DocxFile {
             app,
@@ -362,6 +371,7 @@ impl DocxFile {
             endnotes,
             comments,
             numbering,
+            custom_xml,
         })
     }
 
@@ -528,6 +538,12 @@ impl DocxFile {
             .transpose()?
             .unwrap_or_default();
 
+        let custom_xml = self
+            .custom_xml
+            .iter()
+            .map(|(name, content)| (name.to_string(), Cow::Borrowed(content.as_slice())))
+            .collect();
+
         Ok(Docx {
             app,
             content_types,
@@ -548,6 +564,7 @@ impl DocxFile {
             web_settings,
             comments,
             numbering,
+            custom_xml,
         })
     }
 }
