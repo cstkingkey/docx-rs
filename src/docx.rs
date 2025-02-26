@@ -819,7 +819,7 @@ impl DocxFile {
                 _ if filename.contains("word/header") => read_multiple_to_string!(docx.headers),
                 _ if filename.contains("word/footer") => read_multiple_to_string!(docx.footers),
                 _ if filename.contains("word/theme/theme") => {
-                    read_multiple_to_string!(docx.footers)
+                    read_multiple_to_string!(docx.themes)
                 }
                 _ if filename.contains("word/media") => read_multiple_to_bytes!(docx.medias),
                 _ if filename.contains("custom") => read_multiple_to_bytes!(docx.custom_xml),
