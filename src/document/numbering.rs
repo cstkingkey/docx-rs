@@ -307,7 +307,7 @@ fn xml_parsing() {
     let numbering = Numbering::from_str(NUMBERING_XML).unwrap();
     assert_eq!(numbering.abstract_numberings.len(), 2);
     assert_eq!(numbering.numberings.len(), 2);
-    assert_eq!(numbering.abstract_numberings[0].nsid.value, "0000A990");
+    assert_eq!(numbering.abstract_numberings[0].nsid.unwrap().value, "0000A990");
     assert_eq!(
         numbering.abstract_numberings[0].levels[0]
             .number_format
