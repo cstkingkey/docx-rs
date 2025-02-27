@@ -32,7 +32,7 @@ pub struct AbstractNum<'a> {
     #[xml(attr = "w:abstractNumId")]
     pub abstract_num_id: Option<isize>,
     #[xml(child = "w:nsid")]
-    pub nsid: Nsid<'a>,
+    pub nsid: Option<Nsid<'a>>,
     #[xml(child = "w:multiLevelType")]
     pub multi_level_type: MultiLevelType<'a>,
     #[xml(child = "w:lvl")]
