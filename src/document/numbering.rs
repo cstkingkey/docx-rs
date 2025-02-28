@@ -308,7 +308,11 @@ fn xml_parsing() {
     assert_eq!(numbering.abstract_numberings.len(), 2);
     assert_eq!(numbering.numberings.len(), 2);
     assert_eq!(
-        numbering.abstract_numberings[0].nsid.as_ref().unwrap().value,
+        numbering.abstract_numberings[0]
+            .nsid
+            .as_ref()
+            .unwrap()
+            .value,
         "0000A990"
     );
     assert_eq!(
