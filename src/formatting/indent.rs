@@ -33,7 +33,7 @@ pub struct Indent {
 }
 
 impl Indent {
-    fn left<T>(mut self, val: T) -> Self
+    pub fn left<T>(mut self, val: T) -> Self
     where
         isize: From<T>,
     {
@@ -42,7 +42,7 @@ impl Indent {
         self
     }
 
-    fn right<T>(mut self, val: T) -> Self
+    pub fn right<T>(mut self, val: T) -> Self
     where
         isize: From<T>,
     {
@@ -51,7 +51,7 @@ impl Indent {
         self
     }
 
-    fn first_line<T>(mut self, val: T) -> Self
+    pub fn first_line<T>(mut self, val: T) -> Self
     where
         isize: From<T>,
     {
