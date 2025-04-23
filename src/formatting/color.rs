@@ -63,6 +63,12 @@ pub struct Highlight {
     pub value: Option<HighlightType>,
 }
 
+impl From<HighlightType> for Highlight {
+    fn from(val: HighlightType) -> Self {
+        Highlight { value: Some(val) }
+    }
+}
+
 #[derive(Debug, Clone)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum HighlightType {

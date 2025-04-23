@@ -11,7 +11,7 @@ use super::{BoldComplex, Caps, Highlight, ItalicsComplex, Position, SmallCaps, V
 /// Character Property
 ///
 /// ```rust
-/// use docx_rust::formatting::{CharacterProperty, UnderlineStyle};
+/// use docx_rust::formatting::{CharacterProperty, UnderlineStyle, HighlightType};
 ///
 /// let prop = CharacterProperty::default()
 ///     .style_id("foo")
@@ -24,6 +24,7 @@ use super::{BoldComplex, Caps, Highlight, ItalicsComplex, Position, SmallCaps, V
 ///     .strike(true)
 ///     .dstrike(false)
 ///     .outline(true)
+///     .highlight(HighlightType::Yellow)
 ///     .underline("00ff00")
 ///     .underline(("ff0000", UnderlineStyle::Dash));
 /// ```
@@ -152,6 +153,7 @@ pub struct CharacterProperty<'a> {
 impl<'a> CharacterProperty<'a> {
     __setter!(style_id: Option<CharacterStyleId<'a>>);
     __setter!(color: Option<Color<'a>>);
+    __setter!(highlight: Option<Highlight>);
     __setter!(bold: Option<Bold>);
     __setter!(dstrike: Option<Dstrike>);
     __setter!(italics: Option<Italics>);
