@@ -1025,7 +1025,7 @@ __define_struct_vec! {
 #[xml(tag = "a:gradFill")]
 pub struct GradFill {
     #[xml(attr = "rotWithShape")]
-    pub rotate_with_shape: bool,
+    pub rotate_with_shape: Option<bool>,
     #[xml(child = "a:lin")]
     pub linear_gradient_fill: Option<LinearGradientFill>,
     #[xml(child = "a:gsLst")]
