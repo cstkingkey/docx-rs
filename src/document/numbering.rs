@@ -34,7 +34,7 @@ pub struct AbstractNum<'a> {
     #[xml(child = "w:nsid")]
     pub nsid: Option<Nsid<'a>>,
     #[xml(child = "w:multiLevelType")]
-    pub multi_level_type: MultiLevelType<'a>,
+    pub multi_level_type: Option<MultiLevelType<'a>>,
     #[xml(child = "w:lvl")]
     pub levels: Vec<Level<'a>>,
 }
