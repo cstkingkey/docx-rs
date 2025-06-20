@@ -8,12 +8,13 @@ readme = "README.md"
 repository = "https://github.com/cstkingkey/docx-rs"
 description = "A Rust library for parsing and generating docx files."
 keywords = ["docx", "generator", "openxml", "parser"]
+rust-version = "1.75.0"
 
 [dependencies]
 derive_more = "0.99.17"
 log = "0.4.14"
 hard-xml = "1.27.0"
-zip = {version = "1.1.2", default-features = false, features = ["deflate"]}
+zip = {version = "4", default-features = false, features = ["deflate"]}
 thiserror = "1"
 async_zip = { version = "0.0.17", default-features = false, features = ["deflate"], optional = true }
 futures-io = { version = "0.3.31" , optional = true}
