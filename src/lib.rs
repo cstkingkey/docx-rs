@@ -104,10 +104,12 @@ pub use crate::error::{DocxError, DocxResult};
 pub mod rounded_float {
     use std::num::ParseFloatError;
     pub fn from_xml(mode: &str) -> hard_xml::XmlResult<isize> {
-        let f: f64 = mode.parse()
+        let f: f64 = mode
+            .parse()
             .map_err(|e: ParseFloatError| hard_xml::XmlError::FromStr(e.into()))?;
 
-        let r = f.is_finite()
+        let r = f
+            .is_finite()
             .then_some(f.round())
             .ok_or_else(|| hard_xml::XmlError::FromStr("f64 must be finite".into()))?;
 
