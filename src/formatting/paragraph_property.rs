@@ -291,7 +291,7 @@ pub struct SuppressOverlap {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:outlineLvl")]
 pub struct OutlineLvl {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub value: isize,
 }
 
@@ -299,7 +299,7 @@ pub struct OutlineLvl {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:divId")]
 pub struct DivId {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub value: isize,
 }
 
@@ -315,7 +315,7 @@ pub struct CnfStyle<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:pPrChange")]
 pub struct RevisionParagraphProperty<'a> {
-    #[xml(attr = "w:id")]
+    #[xml(attr = "w:id", with = "crate::rounded_float")]
     pub id: isize,
     #[xml(attr = "w:author")]
     pub author: Cow<'a, str>,
@@ -459,7 +459,7 @@ __define_struct! {
     ("w:tab", CustomTabStop) {
         "w:val", tab_stop_type, TabStopType
         "w:leader", leader, TabLeaderCharacter
-        "w:pos", pos, isize
+        "w:pos", pos, isize, "crate::rounded_float"
     }
 }
 

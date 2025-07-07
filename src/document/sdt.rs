@@ -70,7 +70,7 @@ pub struct SDTProperty<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:id")]
 pub struct STDId {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub id: Option<isize>,
 }
 

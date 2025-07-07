@@ -12,6 +12,6 @@ use hard_xml::{XmlRead, XmlWrite};
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:uiPriority")]
 pub struct Priority {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub value: Option<isize>,
 }

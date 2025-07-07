@@ -11,9 +11,9 @@ use hard_xml::{XmlRead, XmlWrite};
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:pgSz")]
 pub struct PageSize {
-    #[xml(attr = "w:w")]
+    #[xml(attr = "w:w", with = "crate::rounded_float")]
     pub weight: isize,
-    #[xml(attr = "w:h")]
+    #[xml(attr = "w:h", with = "crate::rounded_float")]
     pub height: isize,
 }
 

@@ -13,7 +13,7 @@ use crate::__xml_test_suites;
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:gridCol")]
 pub struct GridColumn {
-    #[xml(attr = "w:w")]
+    #[xml(attr = "w:w", with = "crate::rounded_float")]
     pub width: isize,
 }
 

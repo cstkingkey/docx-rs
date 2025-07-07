@@ -143,7 +143,7 @@ pub struct LevelOverride {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:startOverride")]
 pub struct StartOverride {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub value: Option<isize>,
 }
 
@@ -151,7 +151,7 @@ pub struct StartOverride {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:abstractNumId")]
 pub struct AbstractNumId {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub value: Option<isize>,
 }
 

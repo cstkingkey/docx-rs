@@ -710,7 +710,7 @@ pub struct StyleLockQfset {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:defaultTabStop")]
 pub struct DefaultTabStop {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -788,7 +788,7 @@ pub struct BookFoldPrintingSheets {}
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:drawingGridHorizontalSpacing")]
 pub struct DrawingGridHorizontalSpacing {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -796,7 +796,7 @@ pub struct DrawingGridHorizontalSpacing {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:drawingGridVerticalSpacing")]
 pub struct DrawingGridVerticalSpacing {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -804,7 +804,7 @@ pub struct DrawingGridVerticalSpacing {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:displayHorizontalDrawingGridEvery")]
 pub struct DisplayHorizontalDrawingGridEvery {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -812,7 +812,7 @@ pub struct DisplayHorizontalDrawingGridEvery {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:displayVerticalDrawingGridEvery")]
 pub struct DisplayVerticalDrawingGridEvery {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub val: isize,
 }
 

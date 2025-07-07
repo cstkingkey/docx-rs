@@ -28,7 +28,7 @@ pub struct EndNotes<'a> {
 pub struct EndNote<'a> {
     #[xml(attr = "w:type")]
     pub ty: Option<NoteSeparator>,
-    #[xml(attr = "w:id")]
+    #[xml(attr = "w:id", with = "crate::rounded_float")]
     pub id: Option<isize>,
     #[xml(child = "w:sdt", child = "w:p", child = "w:tbl", child = "w:sectPr")]
     pub content: Vec<BodyContent<'a>>,
