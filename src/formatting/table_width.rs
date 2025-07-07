@@ -15,7 +15,7 @@ use crate::{__string_enum, __xml_test_suites};
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:tblW")]
 pub struct TableWidth {
-    #[xml(attr = "w:w")]
+    #[xml(attr = "w:w", with = "crate::rounded_float")]
     pub value: Option<isize>,
     #[xml(attr = "w:type")]
     pub unit: Option<TableWidthUnit>,
@@ -25,7 +25,7 @@ pub struct TableWidth {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:tcW")]
 pub struct TableCellWidth {
-    #[xml(attr = "w:w")]
+    #[xml(attr = "w:w", with = "crate::rounded_float")]
     pub value: Option<isize>,
     #[xml(attr = "w:type")]
     pub unit: Option<TableWidthUnit>,

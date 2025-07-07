@@ -34,7 +34,7 @@ pub struct Spacing {
     pub after: Option<isize>,
     #[xml(attr = "w:afterAutospacing")]
     pub after_auto_spacing: Option<bool>,
-    #[xml(attr = "w:line")]
+    #[xml(attr = "w:line", with = "crate::rounded_float")]
     pub line: Option<isize>,
     #[xml(attr = "w:lineRule")]
     pub line_rule: Option<LineRule>,

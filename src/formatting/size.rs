@@ -13,7 +13,7 @@ use crate::__xml_test_suites;
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:sz")]
 pub struct Size {
-    #[xml(attr = "w:val")]
+    #[xml(attr = "w:val", with = "crate::rounded_float")]
     pub value: isize,
 }
 

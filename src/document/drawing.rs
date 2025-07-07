@@ -22,17 +22,17 @@ pub struct Drawing<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "wp:anchor")]
 pub struct Anchor<'a> {
-    #[xml(attr = "distT")]
+    #[xml(attr = "distT", with = "crate::rounded_float")]
     pub dist_t: Option<isize>,
-    #[xml(attr = "distB")]
+    #[xml(attr = "distB", with = "crate::rounded_float")]
     pub dist_b: Option<isize>,
-    #[xml(attr = "distL")]
+    #[xml(attr = "distL", with = "crate::rounded_float")]
     pub dist_l: Option<isize>,
-    #[xml(attr = "distR")]
+    #[xml(attr = "distR", with = "crate::rounded_float")]
     pub dist_r: Option<isize>,
-    #[xml(attr = "simplePos")]
+    #[xml(attr = "simplePos", with = "crate::rounded_float")]
     pub simple_pos_attr: Option<isize>,
-    #[xml(attr = "relativeHeight")]
+    #[xml(attr = "relativeHeight", with = "crate::rounded_float")]
     pub relative_height: Option<isize>,
     #[xml(attr = "behindDoc")]
     pub behind_doc: Option<bool>,
@@ -116,9 +116,9 @@ pub struct WrapPolygon {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "wp:start")]
 pub struct WrapPolygonStart {
-    #[xml(attr = "x")]
+    #[xml(attr = "x", with = "crate::rounded_float")]
     pub x: Option<isize>,
-    #[xml(attr = "y")]
+    #[xml(attr = "y", with = "crate::rounded_float")]
     pub y: Option<isize>,
 }
 
@@ -126,9 +126,9 @@ pub struct WrapPolygonStart {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "wp:lineTo")]
 pub struct WrapPolygonLineTo {
-    #[xml(attr = "x")]
+    #[xml(attr = "x", with = "crate::rounded_float")]
     pub x: Option<isize>,
-    #[xml(attr = "y")]
+    #[xml(attr = "y", with = "crate::rounded_float")]
     pub y: Option<isize>,
 }
 
@@ -160,7 +160,7 @@ pub struct WrapTopAndBottom {}
 pub struct PositionHorizontal {
     #[xml(attr = "relativeFrom")]
     pub relative_from: Option<RelativeFromH>,
-    #[xml(flatten_text = "wp:posOffset")]
+    #[xml(flatten_text = "wp:posOffset", with = "crate::rounded_float")]
     pub pos_offset: Option<isize>,
 }
 
@@ -170,7 +170,7 @@ pub struct PositionHorizontal {
 pub struct PositionVertical {
     #[xml(attr = "relativeFrom")]
     pub relative_from: Option<RelativeFromV>,
-    #[xml(flatten_text = "wp:posOffset")]
+    #[xml(flatten_text = "wp:posOffset", with = "crate::rounded_float")]
     pub pos_offset: Option<isize>,
 }
 
@@ -204,17 +204,17 @@ __define_enum! {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "wp:inline")]
 pub struct Inline<'a> {
-    #[xml(attr = "distT")]
+    #[xml(attr = "distT", with = "crate::rounded_float")]
     pub dist_t: Option<isize>,
-    #[xml(attr = "distB")]
+    #[xml(attr = "distB", with = "crate::rounded_float")]
     pub dist_b: Option<isize>,
-    #[xml(attr = "distL")]
+    #[xml(attr = "distL", with = "crate::rounded_float")]
     pub dist_l: Option<isize>,
-    #[xml(attr = "distR")]
+    #[xml(attr = "distR", with = "crate::rounded_float")]
     pub dist_r: Option<isize>,
-    #[xml(attr = "simplePossimplePos")]
+    #[xml(attr = "simplePossimplePos", with = "crate::rounded_float")]
     pub simple_pos_attr: Option<isize>,
-    #[xml(attr = "relativeHeight")]
+    #[xml(attr = "relativeHeight", with = "crate::rounded_float")]
     pub relative_height: Option<isize>,
     #[xml(attr = "behindDoc")]
     pub behind_doc: Option<bool>,
@@ -243,7 +243,7 @@ pub struct Inline<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "wp:docPr")]
 pub struct DocPr<'a> {
-    #[xml(attr = "id")]
+    #[xml(attr = "id", with = "crate::rounded_float")]
     pub id: Option<isize>,
     #[xml(attr = "name")]
     pub name: Option<Cow<'a, str>>,
@@ -325,9 +325,9 @@ pub struct Xfrm {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:ext")]
 pub struct Ext {
-    #[xml(attr = "cx")]
+    #[xml(attr = "cx", with = "crate::rounded_float")]
     pub cx: Option<isize>,
-    #[xml(attr = "cy")]
+    #[xml(attr = "cy", with = "crate::rounded_float")]
     pub cy: Option<isize>,
 }
 
@@ -335,9 +335,9 @@ pub struct Ext {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:off")]
 pub struct Offset {
-    #[xml(attr = "x")]
+    #[xml(attr = "x", with = "crate::rounded_float")]
     pub x: Option<isize>,
-    #[xml(attr = "y")]
+    #[xml(attr = "y", with = "crate::rounded_float")]
     pub y: Option<isize>,
 }
 
@@ -345,9 +345,9 @@ pub struct Offset {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "wp:simplePos")]
 pub struct SimplePos {
-    #[xml(attr = "x")]
+    #[xml(attr = "x", with = "crate::rounded_float")]
     pub x: Option<isize>,
-    #[xml(attr = "y")]
+    #[xml(attr = "y", with = "crate::rounded_float")]
     pub y: Option<isize>,
 }
 
@@ -365,7 +365,7 @@ pub struct NvPicPr<'a> {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "pic:cNvPr")]
 pub struct CNvPr<'a> {
-    #[xml(attr = "id")]
+    #[xml(attr = "id", with = "crate::rounded_float")]
     pub id: Option<isize>,
     #[xml(attr = "name")]
     pub name: Option<Cow<'a, str>>,

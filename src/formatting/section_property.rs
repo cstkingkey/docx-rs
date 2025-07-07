@@ -202,8 +202,8 @@ __define_struct! {
         "w:themeColor", theme_color, crate::formatting::ThemeColor
         "w:themeTint", theme_tint, String
         "w:themeShade", theme_shade, String
-        "w:sz", size, isize // Measurement in Eighths of a Point
-        "w:space", space, isize
+        "w:sz", size, isize, "crate::rounded_float" // Measurement in Eighths of a Point
+        "w:space", space, isize, "crate::rounded_float"
         "w:shadow", shadow, bool
         "w:frame", frame, bool
     }
@@ -216,8 +216,8 @@ __define_struct! {
         "w:themeColor", theme_color, crate::formatting::ThemeColor
         "w:themeTint", theme_tint, String
         "w:themeShade", theme_shade, String
-        "w:sz", size, isize // Measurement in Eighths of a Point
-        "w:space", space, isize
+        "w:sz", size, isize, "crate::rounded_float" // Measurement in Eighths of a Point
+        "w:space", space, isize, "crate::rounded_float"
         "w:shadow", shadow, bool
         "w:frame", frame, bool
     }
@@ -230,8 +230,8 @@ __define_struct! {
         "w:themeColor", theme_color, crate::formatting::ThemeColor
         "w:themeTint", theme_tint, String
         "w:themeShade", theme_shade, String
-        "w:sz", size, isize // Measurement in Eighths of a Point
-        "w:space", space, isize
+        "w:sz", size, isize, "crate::rounded_float"// Measurement in Eighths of a Point
+        "w:space", space, isize, "crate::rounded_float"
         "w:shadow", shadow, bool
         "w:frame", frame, bool
     }
@@ -244,8 +244,8 @@ __define_struct! {
         "w:themeColor", theme_color, crate::formatting::ThemeColor
         "w:themeTint", theme_tint, String
         "w:themeShade", theme_shade, String
-        "w:sz", size, isize // Measurement in Eighths of a Point
-        "w:space", space, isize
+        "w:sz", size, isize, "crate::rounded_float" // Measurement in Eighths of a Point
+        "w:space", space, isize, "crate::rounded_float"
         "w:shadow", shadow, bool
         "w:frame", frame, bool
     }
@@ -253,9 +253,9 @@ __define_struct! {
 
 __define_struct! {
     ("w:lnNumType", PgLnNumType) {
-        "w:countBy", count_by, isize //	[0..1]	w:ST_DecimalNumber	Line Number Increments to Display
-        "w:start", start, isize //	[0..1]	w:ST_DecimalNumber	Line Numbering Starting Value
-        "w:distance", distance, isize //	[0..1]	w:ST_TwipsMeasure	Distance Between Text and Line Numbering
+        "w:countBy", count_by, isize, "crate::rounded_float" //	[0..1]	w:ST_DecimalNumber	Line Number Increments to Display
+        "w:start", start, isize, "crate::rounded_float" //	[0..1]	w:ST_DecimalNumber	Line Numbering Starting Value
+        "w:distance", distance, isize, "crate::rounded_float" //	[0..1]	w:ST_TwipsMeasure	Distance Between Text and Line Numbering
         "w:restart", restart, LineNumberRestart //	[0..1]	w:ST_LineNumberRestart	Line Numbering Restart Setting
     }
 }
@@ -272,8 +272,8 @@ __define_enum! {
 __define_struct! {
     ("w:pgNumType", PgNumType) {
         "w:fmt", fmt, NumberFormat	//Page Number Format
-        "w:start", start, isize //	[0..1]	w:ST_DecimalNumber	Starting Page Number
-        "w:chapStyle", chap_style, isize//	[0..1]	w:ST_DecimalNumber	Chapter Heading Style
+        "w:start", start, isize, "crate::rounded_float" //	[0..1]	w:ST_DecimalNumber	Starting Page Number
+        "w:chapStyle", chap_style, isize, "crate::rounded_float"//	[0..1]	w:ST_DecimalNumber	Chapter Heading Style
         "w:chapSep", chap_sep, ChapterSep//	Chapter Separator Character
     }
 }
@@ -357,7 +357,7 @@ __define_enum! {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:sectPrChange")]
 pub struct Revision<'a> {
-    #[xml(attr = "w:id")]
+    #[xml(attr = "w:id", with = "crate::rounded_float")]
     pub id: isize,
     #[xml(attr = "w:author")]
     pub author: Cow<'a, str>,
@@ -593,7 +593,7 @@ pub struct FootnoteProperty2 {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:footnote")]
 pub struct Footnote {
-    #[xml(attr = "w:id")]
+    #[xml(attr = "w:id", with = "crate::rounded_float")]
     pub id: isize,
 }
 
@@ -619,7 +619,7 @@ pub struct EndnoteProperty2 {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:endnote")]
 pub struct Endnote {
-    #[xml(attr = "w:id")]
+    #[xml(attr = "w:id", with = "crate::rounded_float")]
     pub id: isize,
 }
 

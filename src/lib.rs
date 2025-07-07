@@ -101,6 +101,23 @@ use hard_xml::{XmlWrite, XmlWriter};
 pub use crate::docx::{Docx, DocxFile};
 pub use crate::error::{DocxError, DocxResult};
 
+pub mod rounded_float {
+    use std::num::ParseFloatError;
+    pub fn from_xml(mode: &str) -> hard_xml::XmlResult<isize> {
+        let f: f64 = mode.parse()
+            .map_err(|e: ParseFloatError| hard_xml::XmlError::FromStr(e.into()))?;
+
+        let r = f.is_finite()
+            .then_some(f.round())
+            .ok_or_else(|| hard_xml::XmlError::FromStr("f64 must be finite".into()))?;
+
+        hard_xml::XmlResult::Ok(r as isize)
+    }
+    pub fn to_xml(mode: &isize) -> hard_xml::XmlResult<String> {
+        Ok(mode.to_string())
+    }
+}
+
 pub fn write_attr<W: Write, T: XmlWrite>(
     element: &Option<T>,
     writer: &mut XmlWriter<W>,

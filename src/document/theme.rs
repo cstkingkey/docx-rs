@@ -329,11 +329,11 @@ pub struct Alpha {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:hslClr")]
 pub struct HslClr {
-    #[xml(attr = "hue")]
+    #[xml(attr = "hue", with = "crate::rounded_float")]
     pub hue: Option<isize>,
-    #[xml(attr = "sat")]
+    #[xml(attr = "sat", with = "crate::rounded_float")]
     pub sat: Option<isize>,
-    #[xml(attr = "lum")]
+    #[xml(attr = "lum", with = "crate::rounded_float")]
     pub lum: Option<isize>,
 }
 
@@ -438,7 +438,7 @@ pub struct SchemeClr {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:lumMod")]
 pub struct LuminanceModulation {
-    #[xml(attr = "val")]
+    #[xml(attr = "val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -446,7 +446,7 @@ pub struct LuminanceModulation {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:satMod")]
 pub struct SaturationModulation {
-    #[xml(attr = "val")]
+    #[xml(attr = "val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -454,7 +454,7 @@ pub struct SaturationModulation {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:tint")]
 pub struct Tint {
-    #[xml(attr = "val")]
+    #[xml(attr = "val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -462,7 +462,7 @@ pub struct Tint {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:shade")]
 pub struct Shade {
-    #[xml(attr = "val")]
+    #[xml(attr = "val", with = "crate::rounded_float")]
     pub val: isize,
 }
 
@@ -1042,7 +1042,7 @@ pub struct GradientStopList {
 
 __define_struct_vec! {
     ("a:gs", GradientStop, GradientStopChoice) {
-        "pos", position, isize
+        "pos", position, isize, "crate::rounded_float"
     } {
         "a:scrgbClr", ScrgbClr
         "a:srgbClr", SrgbClr
@@ -1057,7 +1057,7 @@ __define_struct_vec! {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:lin")]
 pub struct LinearGradientFill {
-    #[xml(attr = "ang")]
+    #[xml(attr = "ang", with = "crate::rounded_float")]
     pub angle: isize,
     #[xml(attr = "scaled")]
     pub scaled: bool,
@@ -1073,7 +1073,7 @@ pub struct LineStyleList {
 
 __define_struct_vec! {
     ("a:ln", Outline, OutlineChoice) {
-        "w", line_with, isize
+        "w", line_with, isize, "crate::rounded_float"
         "cap", cap, CapType
         "cmpd", cmpd, CompoundLineType
         "algn", algn, PenAlignment
@@ -1127,7 +1127,7 @@ __string_enum! {
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "a:miter")]
 pub struct MiterLineJoin {
-    #[xml(attr = "lim")]
+    #[xml(attr = "lim", with = "crate::rounded_float")]
     pub limit: isize,
 }
 
@@ -1220,9 +1220,9 @@ pub struct OuterShadow {
     pub direction: Option<isize>,
     #[xml(attr = "algn")]
     pub alignment: Option<PenAlignment>,
-    #[xml(attr = "kx")]
+    #[xml(attr = "kx", with = "crate::rounded_float")]
     pub kx: Option<isize>,
-    #[xml(attr = "ky")]
+    #[xml(attr = "ky", with = "crate::rounded_float")]
     pub ky: Option<isize>,
     #[xml(attr = "rotWithShape")]
     pub rotate_with_shape: Option<bool>,

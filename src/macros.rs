@@ -1,7 +1,7 @@
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __define_struct_vec {
-    ( ($tag:expr, $name:ident, $choicename:ident) { $($value2:expr, $variant2:ident, $ty2: ty)* } { $($value:expr, $variant:ident)* }) => {
+    ( ($tag:expr, $name:ident, $choicename:ident) { $($value2:expr, $variant2:ident, $ty2: ty $(, $with:literal)?)* } { $($value:expr, $variant:ident)* }) => {
         #[derive(Debug, XmlRead, XmlWrite, Clone)]
         #[cfg_attr(test, derive(PartialEq))]
         pub enum $choicename {
@@ -16,7 +16,7 @@ macro_rules! __define_struct_vec {
         #[xml(tag = $tag)]
         pub struct $name {
             $(
-                #[xml(attr = $value2)]
+                #[xml(attr = $value2 $(, with = $with)?)]
                 pub $variant2: Option<$ty2>,
             )*
 
@@ -64,14 +64,13 @@ macro_rules! __define_struct {
             )*
         }
     };
-
-    ( ($tag:expr, $name:ident) { $($value:expr, $variant:ident, $ty: ty)* }) => {
+    ( ($tag:expr, $name:ident) { $($value:expr, $variant:ident, $ty:ty $(, $with:literal)?)* }) => {
         #[derive(Debug, XmlRead, XmlWrite, Clone, Default)]
         #[cfg_attr(test, derive(PartialEq))]
         #[xml(tag = $tag)]
         pub struct $name {
             $(
-                #[xml(attr = $value)]
+                #[xml(attr = $value $(, with = $with)?)]
                 pub $variant: Option<$ty>,
             )*
         }
@@ -86,7 +85,6 @@ macro_rules! __define_struct {
             )*
         }
     };
-
     ( ($tag:expr, $name:ident) { $($value:expr, $variant:ident, $ty: ty)* } { $($value2:expr, $variant2:ident, $ty2: ty)* }) => {
         #[derive(Debug, XmlRead, XmlWrite, Clone, Default)]
         #[cfg_attr(test, derive(PartialEq))]
