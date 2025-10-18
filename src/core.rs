@@ -100,10 +100,7 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
 
         writer.write_attribute("xmlns:dc", SCHEMA_DC)?;
 
-        writer.write_attribute(
-            "xmlns:dcterms",
-            SCHEMA_DCTERMS,
-        )?;
+        writer.write_attribute("xmlns:dcterms", SCHEMA_DCTERMS)?;
 
         if title.is_none()
             && subject.is_none()
