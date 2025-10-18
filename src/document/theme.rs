@@ -1128,7 +1128,7 @@ __string_enum! {
 #[xml(tag = "a:miter")]
 pub struct MiterLineJoin {
     #[xml(attr = "lim", with = "crate::rounded_float")]
-    pub limit: isize,
+    pub limit: Option<isize>,
 }
 
 #[derive(Debug, Default, Clone)]
