@@ -39,7 +39,7 @@ pub struct CoreNamespace<'a> {
     pub modified: Option<Cow<'a, str>>,
     #[xml(flatten_text = "cp:contentStatus")]
     pub content_status: Option<Cow<'a, str>>,
-    #[xml(flatten_text = "cp:language")]
+    #[xml(flatten_text = "dc:language")]
     pub language: Option<Cow<'a, str>>,
     #[xml(flatten_text = "cp:category")]
     pub category: Option<Cow<'a, str>>,
@@ -155,7 +155,7 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
                 writer.write_flatten_text("cp:contentStatus", val, false)?;
             }
             if let Some(val) = language {
-                writer.write_flatten_text("cp:language", val, false)?;
+                writer.write_flatten_text("dc:language", val, false)?;
             }
             if let Some(val) = category {
                 writer.write_flatten_text("cp:category", val, false)?;
@@ -237,7 +237,7 @@ impl<'a> XmlWrite for CoreNoNamespace<'a> {
                 writer.write_flatten_text("cp:contentStatus", val, false)?;
             }
             if let Some(val) = language {
-                writer.write_flatten_text("cp:language", val, false)?;
+                writer.write_flatten_text("dc:language", val, false)?;
             }
             if let Some(val) = category {
                 writer.write_flatten_text("cp:category", val, false)?;
