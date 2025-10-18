@@ -2,6 +2,7 @@
 
 pub const SCHEMA_XML: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n";
 pub const SCHEMA_DC: &str = "http://purl.org/dc/elements/1.1/";
+pub const SCHEMA_DCTERMS: &str = "http://purl.org/dc/terms/";
 pub const SCHEMA_CORE_2: &str =
     "http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
 pub const SCHEMA_DOC_PROPS_V_TYPES: &str =

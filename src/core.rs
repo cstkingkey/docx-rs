@@ -6,7 +6,7 @@ use hard_xml::{XmlRead, XmlResult, XmlWrite, XmlWriter};
 use std::borrow::Cow;
 use std::io::Write;
 
-use crate::schema::{SCHEMA_CORE_2, SCHEMA_DC, SCHEMA_XML};
+use crate::schema::{SCHEMA_CORE_2, SCHEMA_DC, SCHEMA_XML, SCHEMA_DCTERMS};
 
 #[derive(Debug, XmlRead, XmlWrite, Clone)]
 pub enum Core<'a> {
@@ -33,6 +33,10 @@ pub struct CoreNamespace<'a> {
     pub last_modified_by: Option<Cow<'a, str>>,
     #[xml(flatten_text = "cp:revision")]
     pub revision: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "dcterms:created")]
+    pub created: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "dcterms:modified")]
+    pub modified: Option<Cow<'a, str>>,
 }
 
 #[derive(Debug, Default, XmlRead, Clone)]
@@ -52,6 +56,10 @@ pub struct CoreNoNamespace<'a> {
     pub last_modified_by: Option<Cow<'a, str>>,
     #[xml(flatten_text = "revision")]
     pub revision: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "created")]
+    pub created: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "modified")]
+    pub modified: Option<Cow<'a, str>>,
 }
 
 impl<'a> XmlWrite for CoreNamespace<'a> {
@@ -64,6 +72,8 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
             description,
             last_modified_by,
             revision,
+            created,
+            modified,
         } = self;
 
         log::debug!("[Core] Started writing.");
@@ -75,6 +85,11 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
 
         writer.write_attribute("xmlns:dc", SCHEMA_DC)?;
 
+        writer.write_attribute(
+            "xmlns:dcterms",
+            SCHEMA_DCTERMS,
+        )?;
+
         if title.is_none()
             && subject.is_none()
             && creator.is_none()
@@ -82,6 +97,8 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
             && description.is_none()
             && last_modified_by.is_none()
             && revision.is_none()
+            && created.is_none()
+            && modified.is_none()
         {
             writer.write_element_end_empty()?;
         } else {
@@ -106,6 +123,15 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
             }
             if let Some(val) = revision {
                 writer.write_flatten_text("cp:revision", val, false)?;
+            }
+            if let Some(val) = revision {
+                writer.write_flatten_text("cp:revision", val, false)?;
+            }
+            if let Some(val) = created {
+                writer.write_flatten_text("dcterms:created", val, false)?;
+            }
+            if let Some(val) = modified {
+                writer.write_flatten_text("dcterms:modified", val, false)?;
             }
             writer.write_element_end_close("cp:coreProperties")?;
         }
@@ -126,6 +152,8 @@ impl<'a> XmlWrite for CoreNoNamespace<'a> {
             description,
             last_modified_by,
             revision,
+            created,
+            modified,
         } = self;
 
         log::debug!("[Core] Started writing.");
@@ -168,6 +196,12 @@ impl<'a> XmlWrite for CoreNoNamespace<'a> {
             }
             if let Some(val) = revision {
                 writer.write_flatten_text("cp:revision", val, false)?;
+            }
+            if let Some(val) = created {
+                writer.write_flatten_text("dcterms:created", val, false)?;
+            }
+            if let Some(val) = modified {
+                writer.write_flatten_text("dcterms:modified", val, false)?;
             }
             writer.write_element_end_close("cp:coreProperties")?;
         }
