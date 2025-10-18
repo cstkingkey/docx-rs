@@ -37,6 +37,12 @@ pub struct CoreNamespace<'a> {
     pub created: Option<Cow<'a, str>>,
     #[xml(flatten_text = "dcterms:modified")]
     pub modified: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "cp:contentStatus")]
+    pub content_status: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "cp:language")]
+    pub language: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "cp:category")]
+    pub category: Option<Cow<'a, str>>,
 }
 
 #[derive(Debug, Default, XmlRead, Clone)]
@@ -60,6 +66,12 @@ pub struct CoreNoNamespace<'a> {
     pub created: Option<Cow<'a, str>>,
     #[xml(flatten_text = "modified")]
     pub modified: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "contentStatus")]
+    pub content_status: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "language")]
+    pub language: Option<Cow<'a, str>>,
+    #[xml(flatten_text = "category")]
+    pub category: Option<Cow<'a, str>>,
 }
 
 impl<'a> XmlWrite for CoreNamespace<'a> {
@@ -74,6 +86,9 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
             revision,
             created,
             modified,
+            content_status,
+            language,
+            category,
         } = self;
 
         log::debug!("[Core] Started writing.");
@@ -99,6 +114,9 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
             && revision.is_none()
             && created.is_none()
             && modified.is_none()
+            && content_status.is_none()
+            && language.is_none()
+            && category.is_none()
         {
             writer.write_element_end_empty()?;
         } else {
@@ -133,6 +151,15 @@ impl<'a> XmlWrite for CoreNamespace<'a> {
             if let Some(val) = modified {
                 writer.write_flatten_text("dcterms:modified", val, false)?;
             }
+            if let Some(val) = content_status {
+                writer.write_flatten_text("cp:contentStatus", val, false)?;
+            }
+            if let Some(val) = language {
+                writer.write_flatten_text("cp:language", val, false)?;
+            }
+            if let Some(val) = category {
+                writer.write_flatten_text("cp:category", val, false)?;
+            }
             writer.write_element_end_close("cp:coreProperties")?;
         }
 
@@ -154,6 +181,9 @@ impl<'a> XmlWrite for CoreNoNamespace<'a> {
             revision,
             created,
             modified,
+            content_status,
+            language,
+            category,
         } = self;
 
         log::debug!("[Core] Started writing.");
@@ -202,6 +232,15 @@ impl<'a> XmlWrite for CoreNoNamespace<'a> {
             }
             if let Some(val) = modified {
                 writer.write_flatten_text("dcterms:modified", val, false)?;
+            }
+            if let Some(val) = content_status {
+                writer.write_flatten_text("cp:contentStatus", val, false)?;
+            }
+            if let Some(val) = language {
+                writer.write_flatten_text("cp:language", val, false)?;
+            }
+            if let Some(val) = category {
+                writer.write_flatten_text("cp:category", val, false)?;
             }
             writer.write_element_end_close("cp:coreProperties")?;
         }
