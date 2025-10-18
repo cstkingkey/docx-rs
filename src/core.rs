@@ -6,7 +6,7 @@ use hard_xml::{XmlRead, XmlResult, XmlWrite, XmlWriter};
 use std::borrow::Cow;
 use std::io::Write;
 
-use crate::schema::{SCHEMA_CORE_2, SCHEMA_DC, SCHEMA_XML, SCHEMA_DCTERMS};
+use crate::schema::{SCHEMA_CORE_2, SCHEMA_DC, SCHEMA_DCTERMS, SCHEMA_XML};
 
 #[derive(Debug, XmlRead, XmlWrite, Clone)]
 pub enum Core<'a> {
