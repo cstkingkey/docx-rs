@@ -8,7 +8,7 @@ use crate::__setter;
 #[cfg_attr(test, derive(PartialEq))]
 #[xml(tag = "w:top")]
 pub struct TopMargin<'a> {
-    #[xml(attr = "w:w")]
+    #[xml(attr = "w:w", with = "crate::rounded_float")]
     pub size: Option<isize>,
     #[xml(attr = "w:type")]
     pub ty: Option<Cow<'a, str>>,
