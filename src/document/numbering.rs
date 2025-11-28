@@ -44,7 +44,7 @@ pub struct AbstractNum<'a> {
 #[xml(tag = "w:nsid")]
 pub struct Nsid<'a> {
     #[xml(attr = "w:val")]
-    pub value: Cow<'a, str>,
+    pub value: Option<Cow<'a, str>>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
@@ -106,7 +106,7 @@ pub struct LevelStart {
 #[xml(tag = "w:lvlText")]
 pub struct LevelText<'a> {
     #[xml(attr = "w:val")]
-    pub value: Cow<'a, str>,
+    pub value: Option<Cow<'a, str>>,
 }
 
 #[derive(Debug, XmlRead, XmlWrite, Clone)]
@@ -312,7 +312,10 @@ fn xml_parsing() {
             .nsid
             .as_ref()
             .unwrap()
-            .value,
+            .value
+            .as_ref()
+            .unwrap()
+            .as_ref(),
         "0000A990"
     );
     assert_eq!(
@@ -361,7 +364,7 @@ fn find_numbering_details() {
         assert_eq!(
             num.levels[1].level_text,
             Some(LevelText {
-                value: Cow::Borrowed("%2.")
+                value: Some(Cow::Borrowed("%2."))
             })
         );
     }

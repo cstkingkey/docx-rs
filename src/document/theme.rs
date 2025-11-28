@@ -1058,9 +1058,9 @@ __define_struct_vec! {
 #[xml(tag = "a:lin")]
 pub struct LinearGradientFill {
     #[xml(attr = "ang", with = "crate::rounded_float")]
-    pub angle: isize,
+    pub angle: Option<isize>,
     #[xml(attr = "scaled")]
-    pub scaled: bool,
+    pub scaled: Option<bool>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
