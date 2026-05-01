@@ -1,5 +1,8 @@
 use crate::schema::SCHEMA_IMAGE;
 
+mod pic;
+pub use pic::{Pic, EMU_PER_INCH, EMU_PER_PIXEL};
+
 /// Specifies the type of a media file
 ///
 #[derive(Debug, Clone)]

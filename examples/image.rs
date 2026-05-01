@@ -1,0 +1,41 @@
+//! Embed an inline PNG into a docx.
+//!
+//! Run with:
+//!
+//! ```sh
+//! cargo run --example image
+//! ```
+//!
+//! Output: `image.docx` in the working directory. Open in Word and
+//! the picture should appear inline with the surrounding text.
+
+use docx_rust::{
+    document::{Paragraph, Run},
+    media::{MediaType, Pic},
+    Docx, DocxResult,
+};
+
+/// 1x1 transparent PNG, the smallest valid bytes that decode in Word.
+const TINY_PNG: &[u8] = &[
+    0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+    0x89, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0xF8, 0x0F, 0x04, 0x00,
+    0x00, 0x09, 0xFB, 0x03, 0xFD, 0x8E, 0xB8, 0x8C, 0x7E, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E,
+    0x44, 0xAE, 0x42, 0x60, 0x82,
+];
+
+fn main() -> DocxResult<()> {
+    let png = TINY_PNG.to_vec();
+
+    let mut docx = Docx::default();
+    let rid = docx.add_image("dot.png", MediaType::Image, &png);
+    let drawing = Pic::new(rid).name("dot").size_px(32, 32).into_drawing();
+
+    let para = Paragraph::default()
+        .push(Run::default().push_text("Behold a tiny dot: "))
+        .push(Run::default().push_image(drawing));
+    docx.document.push(para);
+
+    docx.write_file("image.docx")?;
+    Ok(())
+}

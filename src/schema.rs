@@ -12,6 +12,7 @@ pub const SCHEMA_CONTENT_TYPES: &str =
 pub const SCHEMA_MAIN: &str = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 pub const SCHEMA_WORDML_14: &str = "http://schemas.microsoft.com/office/word/2010/wordml";
 pub const SCHEMA_DRAWINGML: &str = "http://schemas.openxmlformats.org/drawingml/2006/main";
+pub const SCHEMA_PIC: &str = "http://schemas.openxmlformats.org/drawingml/2006/picture";
 pub const SCHEMA_WP: &str =
     "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
 pub const SCHEMA_RELATIONSHIPS_DOCUMENT: &str =
