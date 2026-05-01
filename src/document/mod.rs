@@ -18,6 +18,7 @@ mod header_footer_reference;
 mod hyperlink;
 mod instrtext;
 mod numbering;
+mod page_field;
 mod paragraph;
 mod run;
 mod sdt;
@@ -33,6 +34,7 @@ mod theme;
 pub use self::{
     body::*, bookmark_end::*, bookmark_start::*, comment_range::*, comments::*, document::*,
     drawing::*, endnotes::*, field_char::*, footer::*, footnotes::*, grid_column::*, header::*,
-    header_footer_reference::*, hyperlink::*, numbering::*, paragraph::*, r#break::*, run::*,
-    sdt::*, tab::*, table::*, table_cell::*, table_grid::*, table_row::*, text::*, theme::*,
+    header_footer_reference::*, hyperlink::*, numbering::*, page_field::*, paragraph::*,
+    r#break::*, run::*, sdt::*, tab::*, table::*, table_cell::*, table_grid::*, table_row::*,
+    text::*, theme::*,
 };

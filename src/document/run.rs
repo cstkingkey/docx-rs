@@ -116,6 +116,15 @@ impl<'a> Run<'a> {
         self
     }
 
+    /// Append a `<w:tab/>` tab character. Useful for splitting a
+    /// header or footer paragraph into left- and right-aligned
+    /// halves via the section's default tab stops.
+    #[inline(always)]
+    pub fn push_tab(mut self) -> Self {
+        self.content.push(RunContent::Tab(Tab));
+        self
+    }
+
     pub fn text(&self) -> String {
         self.iter_text()
             .map(|c| c.to_string())

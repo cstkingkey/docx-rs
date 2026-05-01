@@ -11,11 +11,14 @@ use std::path::Path;
 use zip::write::SimpleFileOptions;
 use zip::{result::ZipError, CompressionMethod, ZipArchive, ZipWriter};
 
-use crate::document::{Comments, EndNotes, FootNotes, Footer, Header, Numbering, Theme};
+use crate::document::{
+    Comments, EndNotes, FootNotes, Footer, FooterReference, Header, HeaderFooterReference,
+    HeaderFooterReferenceType, HeaderReference, Numbering, Theme,
+};
 use crate::media::MediaType;
 use crate::schema::{
-    SCHEMA_COMMENTS, SCHEMA_ENDNOTES, SCHEMA_FOOTNOTES, SCHEMA_HEADER, SCHEMA_NUMBERING,
-    SCHEMA_SETTINGS, SCHEMA_THEME, SCHEMA_WEB_SETTINGS,
+    SCHEMA_COMMENTS, SCHEMA_ENDNOTES, SCHEMA_FOOTER, SCHEMA_FOOTNOTES, SCHEMA_HEADER,
+    SCHEMA_NUMBERING, SCHEMA_SETTINGS, SCHEMA_THEME, SCHEMA_WEB_SETTINGS,
 };
 use crate::settings::Settings;
 use crate::web_settings::WebSettings;
@@ -142,7 +145,7 @@ impl<'a> Docx<'a> {
         for ft in &self.footers {
             self.document_rels
                 .get_or_insert(Relationships::default())
-                .add_rel(SCHEMA_HEADER, ft.0);
+                .add_rel(SCHEMA_FOOTER, ft.0);
         }
 
         for theme in &self.themes {
@@ -292,6 +295,123 @@ impl<'a> Docx<'a> {
             .add_rel_returning_id(Cow::Borrowed(schema), path)
     }
 
+    /// Register a footer with the default reference type
+    /// (`HeaderFooterReferenceType::Default` — applies to every page).
+    ///
+    /// See [`Docx::add_footer_with_type`] for first-page-only or
+    /// even-page variants.
+    pub fn add_footer(&mut self, footer: Footer<'a>) -> String {
+        self.add_footer_with_type(footer, HeaderFooterReferenceType::Default)
+    }
+
+    /// Register a footer for a specific reference type.
+    ///
+    /// Auto-handles:
+    ///
+    /// * allocating the next `footerN.xml` slot in `self.footers`
+    /// * adding the relationship to `self.document_rels`
+    /// * registering the `Override` Content Types entry
+    /// * attaching a `<w:footerReference>` to the trailing
+    ///   `<w:sectPr>` of the body, creating one if necessary
+    ///
+    /// Returns the relationship id (`"rId12"` etc.).
+    pub fn add_footer_with_type(
+        &mut self,
+        footer: Footer<'a>,
+        ty: HeaderFooterReferenceType,
+    ) -> String {
+        let n = (1u32..)
+            .find(|i| !self.footers.contains_key(&format!("footer{}.xml", i)))
+            .expect("u32 range exhausted");
+        let part = format!("footer{}.xml", n);
+
+        self.footers.insert(part.clone(), footer);
+
+        let rid = self
+            .document_rels
+            .get_or_insert_with(Relationships::default)
+            .add_rel_returning_id(Cow::Borrowed(SCHEMA_FOOTER), part.clone());
+
+        self.ensure_part_override(
+            &format!("/word/{}", part),
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml",
+        );
+
+        let reference = FooterReference {
+            ty: Some(ty),
+            id: Some(Cow::Owned(rid.clone())),
+        };
+        self.document
+            .body
+            .last_section_property_mut_or_create()
+            .header_footer_references
+            .push(HeaderFooterReference::Footer(reference));
+
+        rid
+    }
+
+    /// Register a header with the default reference type
+    /// (`HeaderFooterReferenceType::Default` — applies to every page).
+    ///
+    /// See [`Docx::add_header_with_type`] for first-page-only or
+    /// even-page variants.
+    pub fn add_header(&mut self, header: Header<'a>) -> String {
+        self.add_header_with_type(header, HeaderFooterReferenceType::Default)
+    }
+
+    /// Register a header for a specific reference type. Symmetric with
+    /// [`Docx::add_footer_with_type`].
+    pub fn add_header_with_type(
+        &mut self,
+        header: Header<'a>,
+        ty: HeaderFooterReferenceType,
+    ) -> String {
+        let n = (1u32..)
+            .find(|i| !self.headers.contains_key(&format!("header{}.xml", i)))
+            .expect("u32 range exhausted");
+        let part = format!("header{}.xml", n);
+
+        self.headers.insert(part.clone(), header);
+
+        let rid = self
+            .document_rels
+            .get_or_insert_with(Relationships::default)
+            .add_rel_returning_id(Cow::Borrowed(SCHEMA_HEADER), part.clone());
+
+        self.ensure_part_override(
+            &format!("/word/{}", part),
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml",
+        );
+
+        let reference = HeaderReference {
+            ty: Some(ty),
+            id: Some(Cow::Owned(rid.clone())),
+        };
+        self.document
+            .body
+            .last_section_property_mut_or_create()
+            .header_footer_references
+            .push(HeaderFooterReference::Header(reference));
+
+        rid
+    }
+
+    fn ensure_part_override(&mut self, partname: &str, content_type: &'static str) {
+        let already = self
+            .content_types
+            .overrides
+            .iter()
+            .any(|o| o.part == partname);
+        if !already {
+            self.content_types
+                .overrides
+                .push(crate::content_type::OverrideContentType {
+                    part: Cow::Owned(partname.to_string()),
+                    ty: Cow::Borrowed(content_type),
+                });
+        }
+    }
+
     fn ensure_image_content_type(&mut self, ext: &str) {
         let mime = match ext {
             "png" => "image/png",
@@ -393,7 +513,7 @@ impl<'a> Docx<'a> {
         for ft in &self.footers {
             self.document_rels
                 .get_or_insert(Relationships::default())
-                .add_rel(SCHEMA_HEADER, ft.0);
+                .add_rel(SCHEMA_FOOTER, ft.0);
         }
 
         for theme in &self.themes {

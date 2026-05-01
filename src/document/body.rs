@@ -26,6 +26,30 @@ impl<'a> Body<'a> {
         self
     }
 
+    /// Return the trailing `<w:sectPr>` of this body, creating an
+    /// empty one if absent.
+    ///
+    /// Headers and footers are wired into a section via
+    /// `<w:headerReference>` / `<w:footerReference>` children of a
+    /// `<w:sectPr>`. A well-formed document has exactly one section
+    /// property at the end of the body; this helper makes that
+    /// guaranteed without forcing every caller to walk the content
+    /// vector.
+    pub fn last_section_property_mut_or_create(&mut self) -> &mut SectionProperty<'a> {
+        let last_is_sect_pr = matches!(
+            self.content.last(),
+            Some(BodyContent::SectionProperty(_))
+        );
+        if !last_is_sect_pr {
+            self.content
+                .push(BodyContent::SectionProperty(SectionProperty::default()));
+        }
+        match self.content.last_mut() {
+            Some(BodyContent::SectionProperty(sp)) => sp,
+            _ => unreachable!("just pushed or matched a SectionProperty"),
+        }
+    }
+
     pub fn text(&self) -> String {
         let v: Vec<_> = self
             .content
