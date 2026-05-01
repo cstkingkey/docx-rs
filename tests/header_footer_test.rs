@@ -50,7 +50,10 @@ fn add_footer_writes_part_rel_override_and_section_reference() {
     let cursor = Cursor::new(bytes.as_slice());
     let mut zip = ZipArchive::new(cursor).unwrap();
 
-    assert!(zip.by_name("word/footer1.xml").is_ok(), "footer1.xml missing");
+    assert!(
+        zip.by_name("word/footer1.xml").is_ok(),
+        "footer1.xml missing"
+    );
 
     let rels = read_part(&mut zip, "word/_rels/document.xml.rels");
     assert!(rels.contains(r#"Target="footer1.xml""#));
@@ -111,7 +114,10 @@ fn add_header_writes_part_rel_override_and_section_reference() {
     let cursor = Cursor::new(bytes.as_slice());
     let mut zip = ZipArchive::new(cursor).unwrap();
 
-    assert!(zip.by_name("word/header1.xml").is_ok(), "header1.xml missing");
+    assert!(
+        zip.by_name("word/header1.xml").is_ok(),
+        "header1.xml missing"
+    );
 
     let rels = read_part(&mut zip, "word/_rels/document.xml.rels");
     assert!(rels.contains(r#"Target="header1.xml""#));
@@ -196,8 +202,12 @@ fn two_footers_get_distinct_part_names() {
 #[test]
 fn run_push_tab_emits_tab_element() {
     let mut docx = Docx::default();
-    let para = Paragraph::default()
-        .push(Run::default().push_text("left").push_tab().push_text("right"));
+    let para = Paragraph::default().push(
+        Run::default()
+            .push_text("left")
+            .push_tab()
+            .push_text("right"),
+    );
     docx.document.push(para);
     let bytes = write_to_zip(&mut docx);
     let cursor = Cursor::new(bytes.as_slice());

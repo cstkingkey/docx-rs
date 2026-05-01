@@ -36,10 +36,7 @@ impl<'a> Body<'a> {
     /// guaranteed without forcing every caller to walk the content
     /// vector.
     pub fn last_section_property_mut_or_create(&mut self) -> &mut SectionProperty<'a> {
-        let last_is_sect_pr = matches!(
-            self.content.last(),
-            Some(BodyContent::SectionProperty(_))
-        );
+        let last_is_sect_pr = matches!(self.content.last(), Some(BodyContent::SectionProperty(_)));
         if !last_is_sect_pr {
             self.content
                 .push(BodyContent::SectionProperty(SectionProperty::default()));
