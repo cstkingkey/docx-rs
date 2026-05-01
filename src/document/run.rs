@@ -4,13 +4,13 @@ use hard_xml::{XmlRead, XmlWrite};
 use std::borrow::{Borrow, Cow};
 
 use crate::{
-    __setter, __xml_test_suites,
+    __define_enum, __define_struct, __setter, __xml_test_suites,
     document::{
         drawing::Drawing, field_char::FieldChar, instrtext::InstrText, r#break::Break,
         r#break::LastRenderedPageBreak, tab::Tab, text::Text,
     },
     formatting::CharacterProperty,
-    DocxResult, __define_enum, __define_struct,
+    DocxResult,
 };
 
 use super::{
