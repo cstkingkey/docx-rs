@@ -13,9 +13,7 @@
 //! on the right.
 
 use docx_rust::{
-    document::{
-        num_pages_field, page_field, Footer, Header, Paragraph, Run,
-    },
+    document::{num_pages_field, page_field, Footer, Header, Paragraph, Run},
     Docx, DocxResult,
 };
 
@@ -23,15 +21,14 @@ fn main() -> DocxResult<()> {
     let mut docx = Docx::default();
 
     for i in 1..=40 {
-        let para = Paragraph::default()
-            .push(Run::default().push_text(format!("Body paragraph {}.", i)));
+        let para =
+            Paragraph::default().push(Run::default().push_text(format!("Body paragraph {}.", i)));
         docx.document.push(para);
     }
 
     let mut header = Header::default();
     header.push(
-        Paragraph::default()
-            .push(Run::default().push_text("Confidential — Workbench Export")),
+        Paragraph::default().push(Run::default().push_text("Confidential — Workbench Export")),
     );
     docx.add_header(header);
 
