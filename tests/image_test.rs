@@ -74,7 +74,12 @@ fn single_image_registers_media_rel_and_content_type() {
     );
 
     let doc = read_part(&mut zip, "word/document.xml");
-    assert!(doc.contains(r#"r:embed="rId1""#) || doc.contains(&format!(r#"r:embed="{}""#, rid)));
+    assert!(
+        doc.contains(&format!(r#"r:embed="{}""#, rid)),
+        "drawing chain must embed the rid returned by add_image ({}); doc.xml: {}",
+        rid,
+        doc
+    );
     assert!(doc.contains("<w:drawing>"));
     assert!(doc.contains("<pic:pic"));
 }

@@ -308,8 +308,9 @@ impl<'a> Docx<'a> {
     /// inside the zip. `png_fallback_bytes` are NOT auto-generated —
     /// the caller is responsible for rasterising the SVG at the
     /// desired display resolution. For an opt-in auto-rasterise
-    /// path, enable the `svg-rasterize` cargo feature and use
-    /// [`Docx::add_svg_auto`].
+    /// path, enable the `svg-rasterize` cargo feature and call
+    /// [`crate::media::rasterize_svg`] yourself, then pass its
+    /// output as `png_fallback_bytes`.
     ///
     /// Returns [`crate::media::SvgImageIds`] holding both relationship
     /// ids; pass it to [`crate::media::Pic::with_svg`] to build the

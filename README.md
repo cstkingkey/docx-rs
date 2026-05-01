@@ -117,11 +117,15 @@ docx-rust = { version = "0.2", features = ["svg-rasterize"] }
 ```
 
 ```rust
+use docx_rust::Docx;
 use docx_rust::media::{rasterize_svg, Pic};
 
 let svg = std::fs::read("logo.svg")?;
 let png = rasterize_svg(&svg, 240, 120)?;   // 2x display size for crispness
+
+let mut docx = Docx::default();
 let ids = docx.add_svg("logo", &svg, &png);
+let drawing = Pic::with_svg(ids).size_px(120, 60).into_drawing();
 ```
 
 See [`examples/svg.rs`](./examples/svg.rs) (caller-supplied) and
