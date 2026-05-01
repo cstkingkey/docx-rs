@@ -313,6 +313,15 @@ impl<'a> Docx<'a> {
     /// * registering the `Override` Content Types entry
     /// * attaching a `<w:footerReference>` to the trailing
     ///   `<w:sectPr>` of the body, creating one if necessary
+    /// * for `First` types, also setting `<w:titlePg/>` on the
+    ///   trailing section properties — Word ignores a
+    ///   `w:type="first"` reference without this flag
+    /// * for `Even` types, also setting `<w:evenAndOddHeaders/>`
+    ///   on `word/settings.xml` — Word ignores a `w:type="even"`
+    ///   reference without this setting
+    /// * if a footer of the same type already exists for this
+    ///   section, the old reference is replaced rather than
+    ///   appended (Word treats duplicates inconsistently)
     ///
     /// Returns the relationship id (`"rId12"` etc.).
     pub fn add_footer_with_type(
@@ -338,14 +347,15 @@ impl<'a> Docx<'a> {
         );
 
         let reference = FooterReference {
-            ty: Some(ty),
+            ty: Some(ty.clone()),
             id: Some(Cow::Owned(rid.clone())),
         };
-        self.document
-            .body
-            .last_section_property_mut_or_create()
-            .header_footer_references
-            .push(HeaderFooterReference::Footer(reference));
+        let sect_pr = self.document.body.last_section_property_mut_or_create();
+        replace_footer_reference_of_type(&mut sect_pr.header_footer_references, &ty, reference);
+        if matches!(ty, HeaderFooterReferenceType::First) {
+            sect_pr.title_page = Some(crate::formatting::TitlePage::default());
+        }
+        self.ensure_settings_for_type(&ty);
 
         rid
     }
@@ -360,7 +370,10 @@ impl<'a> Docx<'a> {
     }
 
     /// Register a header for a specific reference type. Symmetric with
-    /// [`Docx::add_footer_with_type`].
+    /// [`Docx::add_footer_with_type`] — see that method for the full
+    /// list of side-effects (Content Types, rels, section reference,
+    /// `titlePg` for First, `evenAndOddHeaders` for Even, replace
+    /// existing reference of same type rather than append).
     pub fn add_header_with_type(
         &mut self,
         header: Header<'a>,
@@ -384,16 +397,26 @@ impl<'a> Docx<'a> {
         );
 
         let reference = HeaderReference {
-            ty: Some(ty),
+            ty: Some(ty.clone()),
             id: Some(Cow::Owned(rid.clone())),
         };
-        self.document
-            .body
-            .last_section_property_mut_or_create()
-            .header_footer_references
-            .push(HeaderFooterReference::Header(reference));
+        let sect_pr = self.document.body.last_section_property_mut_or_create();
+        replace_header_reference_of_type(&mut sect_pr.header_footer_references, &ty, reference);
+        if matches!(ty, HeaderFooterReferenceType::First) {
+            sect_pr.title_page = Some(crate::formatting::TitlePage::default());
+        }
+        self.ensure_settings_for_type(&ty);
 
         rid
+    }
+
+    fn ensure_settings_for_type(&mut self, ty: &HeaderFooterReferenceType) {
+        if matches!(ty, HeaderFooterReferenceType::Even) {
+            let settings = self.settings.get_or_insert_with(Settings::default);
+            if settings.even_and_odd_headers.is_none() {
+                settings.even_and_odd_headers = Some(crate::settings::EvenAndOddHeaders::default());
+            }
+        }
     }
 
     fn ensure_part_override(&mut self, partname: &str, content_type: &'static str) {
@@ -435,6 +458,47 @@ impl<'a> Docx<'a> {
                     ty: Cow::Borrowed(mime),
                 });
         }
+    }
+}
+
+/// Replace any existing header reference of `ty`, then append the new
+/// one. Header- and footer-references coexist in one Vec discriminated
+/// by enum variant, so the helper only touches Header variants.
+fn replace_header_reference_of_type<'a>(
+    refs: &mut Vec<HeaderFooterReference<'a>>,
+    ty: &HeaderFooterReferenceType,
+    new_ref: HeaderReference<'a>,
+) {
+    refs.retain(|r| match r {
+        HeaderFooterReference::Header(h) => !matches_type(&h.ty, ty),
+        HeaderFooterReference::Footer(_) => true,
+    });
+    refs.push(HeaderFooterReference::Header(new_ref));
+}
+
+/// Footer-side counterpart to [`replace_header_reference_of_type`].
+fn replace_footer_reference_of_type<'a>(
+    refs: &mut Vec<HeaderFooterReference<'a>>,
+    ty: &HeaderFooterReferenceType,
+    new_ref: FooterReference<'a>,
+) {
+    refs.retain(|r| match r {
+        HeaderFooterReference::Footer(f) => !matches_type(&f.ty, ty),
+        HeaderFooterReference::Header(_) => true,
+    });
+    refs.push(HeaderFooterReference::Footer(new_ref));
+}
+
+fn matches_type(
+    found: &Option<HeaderFooterReferenceType>,
+    expected: &HeaderFooterReferenceType,
+) -> bool {
+    use HeaderFooterReferenceType::*;
+    match (found, expected) {
+        (Some(Default), Default) | (None, Default) => true,
+        (Some(First), First) => true,
+        (Some(Even), Even) => true,
+        _ => false,
     }
 }
 

@@ -175,6 +175,76 @@ fn first_page_footer_uses_first_reference_type() {
         "first-page footer ref type missing: {}",
         doc
     );
+    // Without `<w:titlePg/>` Word silently ignores a `w:type="first"`
+    // reference. The helper must auto-add it.
+    assert!(
+        doc.contains("<w:titlePg"),
+        "first-page reference type without <w:titlePg/>: Word will ignore it. doc.xml: {}",
+        doc
+    );
+}
+
+#[test]
+fn even_page_header_writes_even_and_odd_headers_setting() {
+    let mut docx = Docx::default();
+    docx.document
+        .push(Paragraph::default().push(Run::default().push_text("body")));
+
+    let mut header = Header::default();
+    header.push(Paragraph::default().push(Run::default().push_text("even")));
+    docx.add_header_with_type(header, HeaderFooterReferenceType::Even);
+
+    let bytes = write_to_zip(&mut docx);
+    let cursor = Cursor::new(bytes.as_slice());
+    let mut zip = ZipArchive::new(cursor).unwrap();
+
+    // Without `<w:evenAndOddHeaders/>` in settings.xml Word silently
+    // ignores `w:type="even"` references.
+    let settings = zip
+        .by_name("word/settings.xml")
+        .map(|mut e| {
+            let mut s = String::new();
+            std::io::Read::read_to_string(&mut e, &mut s).unwrap();
+            s
+        })
+        .expect("settings.xml must be written when an even-page reference is added");
+    assert!(
+        settings.contains("<w:evenAndOddHeaders"),
+        "evenAndOddHeaders missing from settings.xml: {}",
+        settings
+    );
+}
+
+#[test]
+fn registering_two_footers_of_the_same_type_replaces_the_old_reference() {
+    let mut docx = Docx::default();
+    docx.document
+        .push(Paragraph::default().push(Run::default().push_text("body")));
+
+    // First registration of type Default.
+    let mut a = Footer::default();
+    a.push(Paragraph::default().push(Run::default().push_text("v1")));
+    docx.add_footer(a);
+
+    // Second registration of the same type. Should replace the
+    // section reference, not stack two of them.
+    let mut b = Footer::default();
+    b.push(Paragraph::default().push(Run::default().push_text("v2")));
+    docx.add_footer(b);
+
+    let bytes = write_to_zip(&mut docx);
+    let cursor = Cursor::new(bytes.as_slice());
+    let mut zip = ZipArchive::new(cursor).unwrap();
+    let doc = read_part(&mut zip, "word/document.xml");
+
+    let count = doc
+        .matches(r#"<w:footerReference w:type="default""#)
+        .count();
+    assert_eq!(
+        count, 1,
+        "expected exactly one default footerReference; got {} in doc.xml: {}",
+        count, doc
+    );
 }
 
 #[test]

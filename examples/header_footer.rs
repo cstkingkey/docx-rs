@@ -9,8 +9,8 @@
 //!
 //! Open `header_footer.docx` in Word. The header should read
 //! "Confidential — Workbench Export" on every page; the footer
-//! should show the doc title on the left and "Page <n> of <total>"
-//! on the right.
+//! should show "ImageRight Workbench Export" on the left and
+//! "Page <n> of <total>" on the right.
 
 use docx_rust::{
     document::{num_pages_field, page_field, Footer, Header, Paragraph, Run},
