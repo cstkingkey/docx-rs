@@ -46,7 +46,7 @@ pub struct Pic<'a> {
     descr: Option<Cow<'a, str>>,
     width_emu: u64,
     height_emu: u64,
-    doc_id: isize,
+    doc_id: u32,
 }
 
 impl<'a> Pic<'a> {
@@ -76,9 +76,15 @@ impl<'a> Pic<'a> {
     }
 
     /// Set size in pixels at 96 DPI. Internally converts to EMU.
+    ///
+    /// Saturates at `u64::MAX` if the multiplication overflows, so a
+    /// pathological caller cannot panic the builder. The resulting
+    /// EMU value will exceed Word's max image dimension and the
+    /// document will simply render that picture clamped to the page,
+    /// which is the right failure mode for unrealistic sizes.
     pub fn size_px(mut self, w: u64, h: u64) -> Self {
-        self.width_emu = w * EMU_PER_PIXEL;
-        self.height_emu = h * EMU_PER_PIXEL;
+        self.width_emu = w.saturating_mul(EMU_PER_PIXEL);
+        self.height_emu = h.saturating_mul(EMU_PER_PIXEL);
         self
     }
 
@@ -91,7 +97,10 @@ impl<'a> Pic<'a> {
 
     /// Set the document-wide unique picture id. Defaults to 1; bump
     /// when embedding multiple images in the same document.
-    pub fn doc_id(mut self, id: isize) -> Self {
+    ///
+    /// `wp:docPr/@id` and `pic:cNvPr/@id` are both unsigned in the
+    /// OOXML schema; `u32` matches that contract.
+    pub fn doc_id(mut self, id: u32) -> Self {
         self.doc_id = id;
         self
     }
@@ -107,14 +116,22 @@ impl<'a> Pic<'a> {
             doc_id,
         } = self;
 
-        let cx = width_emu as isize;
-        let cy = height_emu as isize;
+        // The XML uses `Option<isize>` for these fields. Saturate
+        // rather than wrap if a caller passed an absurdly large EMU
+        // value: an overflow-wrap would emit a negative cx/cy and
+        // Word would treat the picture as zero-sized or invalid.
+        let cx = isize::try_from(width_emu).unwrap_or(isize::MAX);
+        let cy = isize::try_from(height_emu).unwrap_or(isize::MAX);
+        // doc_id is u32 from the public API; widening to isize for
+        // the XML attribute is always lossless on 64-bit, and on
+        // 32-bit isize::MAX > u32::MAX/2 so values up to 2^31-1 fit.
+        let id = isize::try_from(doc_id).unwrap_or(isize::MAX);
 
         let picture = Picture {
             a: Cow::Borrowed(SCHEMA_PIC),
             nv_pic_pr: NvPicPr {
                 c_nv_pr: Some(CNvPr {
-                    id: Some(doc_id),
+                    id: Some(id),
                     name: Some(name.clone()),
                     descr: descr.clone(),
                 }),
@@ -161,7 +178,7 @@ impl<'a> Pic<'a> {
                 cy: height_emu,
             }),
             doc_property: DocPr {
-                id: Some(doc_id),
+                id: Some(id),
                 name: Some(name),
                 descr,
             },

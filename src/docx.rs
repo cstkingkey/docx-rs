@@ -56,7 +56,7 @@ pub struct Docx<'a> {
     pub headers: HashMap<String, Header<'a>>,
     pub footers: HashMap<String, Footer<'a>>,
     pub themes: HashMap<String, Theme<'a>>,
-    pub media: HashMap<String, (MediaType, &'a Vec<u8>)>,
+    pub media: HashMap<String, (MediaType, &'a [u8])>,
     pub footnotes: Option<FootNotes<'a>>,
     pub endnotes: Option<EndNotes<'a>>,
     pub settings: Option<Settings<'a>>,
@@ -256,13 +256,27 @@ impl<'a> Docx<'a> {
     /// generated `.docx` opens as "corrupt" in Word.
     ///
     /// The image bytes are borrowed for the lifetime of the `Docx`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `filename` is not a leaf name (contains `/`, `\\`,
+    /// or `..`). This guards against zip-path traversal: a caller
+    /// passing `"../_rels/document.xml.rels"` would otherwise
+    /// overwrite an internal package part. Pass only the file's
+    /// basename — the helper places it under `word/media/` itself.
     pub fn add_image(
         &mut self,
         filename: impl Into<Cow<'a, str>>,
         media_type: MediaType,
-        bytes: &'a Vec<u8>,
+        bytes: &'a [u8],
     ) -> String {
         let filename = filename.into();
+        if filename.contains('/') || filename.contains('\\') || filename.contains("..") {
+            panic!(
+                "add_image filename must be a leaf name with no path separators or '..': {:?}",
+                filename
+            );
+        }
         let path = format!("media/{}", filename);
 
         if let Some(ext) = filename.rsplit('.').next() {
@@ -642,7 +656,7 @@ impl DocxFile {
             let mt = crate::media::get_media_type(&m.0);
             if let Some(mt) = mt {
                 let name = m.0.replace("word/", "");
-                let m = (mt, &m.1);
+                let m = (mt, m.1.as_slice());
                 media.insert(name, m);
             }
         }
