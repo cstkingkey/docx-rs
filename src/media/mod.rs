@@ -1,7 +1,12 @@
 use crate::schema::SCHEMA_IMAGE;
 
 mod pic;
-pub use pic::{Pic, EMU_PER_INCH, EMU_PER_PIXEL};
+pub use pic::{Pic, SvgImageIds, EMU_PER_INCH, EMU_PER_PIXEL};
+
+#[cfg(feature = "svg-rasterize")]
+mod svg_rasterize;
+#[cfg(feature = "svg-rasterize")]
+pub use svg_rasterize::{rasterize_svg, SvgRasterizeError};
 
 /// Specifies the type of a media file
 ///
@@ -22,6 +27,10 @@ pub fn get_media_type(filename: &str) -> Option<MediaType> {
         | filename.ends_with("jpg")
         | filename.ends_with("jpeg")
         | filename.ends_with("bmp")
+        | filename.ends_with("gif")
+        | filename.ends_with("tif")
+        | filename.ends_with("tiff")
+        | filename.ends_with("svg")
     {
         Some(MediaType::Image)
     } else {

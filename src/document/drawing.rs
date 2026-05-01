@@ -396,6 +396,46 @@ pub struct Blip<'a> {
     pub embed: Cow<'a, str>,
     #[xml(default, attr = "cstate")]
     pub cstate: Option<Cow<'a, str>>,
+    #[xml(child = "a:extLst")]
+    pub ext_lst: Option<BlipExtList<'a>>,
+}
+
+/// `<a:extLst>` — extension list inside an `<a:blip>`. Currently used
+/// by this crate to carry the Office 2016+ `asvg:svgBlip` element so
+/// modern Word renders an SVG companion to the raster fallback.
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:extLst")]
+pub struct BlipExtList<'a> {
+    #[xml(child = "a:ext")]
+    pub exts: Vec<BlipExt<'a>>,
+}
+
+/// `<a:ext uri="...">` — a single extension entry. The URI identifies
+/// the extension; readers that recognise it consume the children,
+/// readers that don't ignore the whole element. See
+/// [`crate::schema::SVG_BLIP_EXT_URI`] for the SVG-specific value.
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "a:ext")]
+pub struct BlipExt<'a> {
+    #[xml(default, attr = "uri")]
+    pub uri: Cow<'a, str>,
+    #[xml(child = "asvg:svgBlip")]
+    pub svg_blip: Option<SvgBlip<'a>>,
+}
+
+/// `<asvg:svgBlip>` — Office 2016+ extension pointing at the SVG bytes.
+/// Modern Word renders this; legacy Word ignores it and falls back to
+/// the standard `<a:blip>` PNG.
+#[derive(Debug, Default, XmlRead, XmlWrite, Clone)]
+#[cfg_attr(test, derive(PartialEq))]
+#[xml(tag = "asvg:svgBlip")]
+pub struct SvgBlip<'a> {
+    #[xml(default, attr = "xmlns:asvg")]
+    pub xmlns_asvg: Cow<'a, str>,
+    #[xml(default, attr = "r:embed")]
+    pub embed: Cow<'a, str>,
 }
 
 #[derive(Debug, Default, XmlRead, XmlWrite, Clone)]

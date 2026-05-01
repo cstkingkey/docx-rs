@@ -13,6 +13,13 @@ pub const SCHEMA_MAIN: &str = "http://schemas.openxmlformats.org/wordprocessingm
 pub const SCHEMA_WORDML_14: &str = "http://schemas.microsoft.com/office/word/2010/wordml";
 pub const SCHEMA_DRAWINGML: &str = "http://schemas.openxmlformats.org/drawingml/2006/main";
 pub const SCHEMA_PIC: &str = "http://schemas.openxmlformats.org/drawingml/2006/picture";
+pub const SCHEMA_ASVG: &str = "http://schemas.microsoft.com/office/drawing/2016/SVG/main";
+
+/// MS Office's stable URI marker for the SVG-blip extension. Word
+/// reads `<a:ext>` elements by URI; only this exact UUID identifies
+/// the SVG bytes as the modern-render alternative for the legacy
+/// raster `<a:blip>`.
+pub const SVG_BLIP_EXT_URI: &str = "{96DAC541-7B7A-43D3-8B79-37D633B846F1}";
 pub const SCHEMA_WP: &str =
     "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
 pub const SCHEMA_RELATIONSHIPS_DOCUMENT: &str =
