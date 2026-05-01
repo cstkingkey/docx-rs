@@ -243,6 +243,67 @@ impl<'a> Docx<'a> {
         let file = File::create(path)?;
         self.write(file)
     }
+
+    /// Register an image in the document's media store and return the
+    /// relationship id (e.g. `"rId12"`) that callers pass to
+    /// [`Pic::new`](crate::media::Pic::new).
+    ///
+    /// `filename` is the leaf name (e.g. `"cat.png"`); the helper
+    /// stores it under `media/<filename>` in the resulting zip.
+    ///
+    /// Auto-registers a `<Default>` Content Types entry for the file
+    /// extension if one is not already present. Without this the
+    /// generated `.docx` opens as "corrupt" in Word.
+    ///
+    /// The image bytes are borrowed for the lifetime of the `Docx`.
+    pub fn add_image(
+        &mut self,
+        filename: impl Into<Cow<'a, str>>,
+        media_type: MediaType,
+        bytes: &'a Vec<u8>,
+    ) -> String {
+        let filename = filename.into();
+        let path = format!("media/{}", filename);
+
+        if let Some(ext) = filename.rsplit('.').next() {
+            self.ensure_image_content_type(&ext.to_ascii_lowercase());
+        }
+
+        self.media.insert(path.clone(), (media_type, bytes));
+
+        let schema = crate::media::get_media_type_relation_type(
+            &self.media[&path].0,
+        );
+
+        self.document_rels
+            .get_or_insert_with(Relationships::default)
+            .add_rel_returning_id(Cow::Borrowed(schema), path)
+    }
+
+    fn ensure_image_content_type(&mut self, ext: &str) {
+        let mime = match ext {
+            "png" => "image/png",
+            "jpg" | "jpeg" => "image/jpeg",
+            "bmp" => "image/bmp",
+            "gif" => "image/gif",
+            "tif" | "tiff" => "image/tiff",
+            _ => return,
+        };
+
+        let already = self
+            .content_types
+            .defaults
+            .iter()
+            .any(|d| d.ext.eq_ignore_ascii_case(ext));
+        if !already {
+            self.content_types
+                .defaults
+                .push(crate::content_type::DefaultContentType {
+                    ext: Cow::Owned(ext.to_string()),
+                    ty: Cow::Borrowed(mime),
+                });
+        }
+    }
 }
 
 #[cfg(feature = "async")]

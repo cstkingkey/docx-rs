@@ -108,6 +108,14 @@ impl<'a> Run<'a> {
         self
     }
 
+    /// Append an inline drawing (typically built via
+    /// [`Pic::into_drawing`](crate::media::Pic::into_drawing)).
+    #[inline(always)]
+    pub fn push_image(mut self, drawing: Drawing<'a>) -> Self {
+        self.content.push(RunContent::Drawing(drawing));
+        self
+    }
+
     pub fn text(&self) -> String {
         self.iter_text()
             .map(|c| c.to_string())
