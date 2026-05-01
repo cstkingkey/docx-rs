@@ -271,9 +271,7 @@ impl<'a> Docx<'a> {
 
         self.media.insert(path.clone(), (media_type, bytes));
 
-        let schema = crate::media::get_media_type_relation_type(
-            &self.media[&path].0,
-        );
+        let schema = crate::media::get_media_type_relation_type(&self.media[&path].0);
 
         self.document_rels
             .get_or_insert_with(Relationships::default)
