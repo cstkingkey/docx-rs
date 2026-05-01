@@ -295,6 +295,41 @@ impl<'a> Docx<'a> {
             .add_rel_returning_id(Cow::Borrowed(schema), path)
     }
 
+    /// Register an SVG image with a paired raster fallback.
+    ///
+    /// Word 2016+ renders the SVG via the `asvg:svgBlip` extension on
+    /// the `<a:blip>`; older Word ignores the extension and uses the
+    /// raster fallback. Both parts are stored as media in the docx
+    /// zip; both get relationships in `document.xml.rels`; both
+    /// extensions are registered in `[Content_Types].xml`.
+    ///
+    /// `name_stem` is the leaf name without extension (e.g. `"logo"`).
+    /// The helper produces `media/<stem>.svg` and `media/<stem>.png`
+    /// inside the zip. `png_fallback_bytes` are NOT auto-generated —
+    /// the caller is responsible for rasterising the SVG at the
+    /// desired display resolution. For an opt-in auto-rasterise
+    /// path, enable the `svg-rasterize` cargo feature and use
+    /// [`Docx::add_svg_auto`].
+    ///
+    /// Returns [`crate::media::SvgImageIds`] holding both relationship
+    /// ids; pass it to [`crate::media::Pic::with_svg`] to build the
+    /// drawing.
+    pub fn add_svg(
+        &mut self,
+        name_stem: impl Into<Cow<'a, str>>,
+        svg_bytes: &'a Vec<u8>,
+        png_fallback_bytes: &'a Vec<u8>,
+    ) -> crate::media::SvgImageIds {
+        let stem = name_stem.into();
+        let svg_filename = format!("{}.svg", stem);
+        let png_filename = format!("{}.png", stem);
+
+        let png_rid = self.add_image(png_filename, MediaType::Image, png_fallback_bytes);
+        let svg_rid = self.add_image(svg_filename, MediaType::Image, svg_bytes);
+
+        crate::media::SvgImageIds { svg_rid, png_rid }
+    }
+
     /// Register a footer with the default reference type
     /// (`HeaderFooterReferenceType::Default` — applies to every page).
     ///
@@ -442,6 +477,7 @@ impl<'a> Docx<'a> {
             "bmp" => "image/bmp",
             "gif" => "image/gif",
             "tif" | "tiff" => "image/tiff",
+            "svg" => "image/svg+xml",
             _ => return,
         };
 

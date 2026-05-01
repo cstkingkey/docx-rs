@@ -81,6 +81,52 @@ escape hatch for arbitrary field instructions.
 See [`examples/header_footer.rs`](./examples/header_footer.rs) for an
 end-to-end run.
 
+## SVG with raster fallback
+
+Word 2016+ renders embedded SVG vectorially via the `asvg:svgBlip`
+extension on the standard `<a:blip>`. Older Word ignores the extension
+and falls back to the raster image. Both companion files live in
+`word/media/`, both get relationships, both extensions are registered
+in `[Content_Types].xml`.
+
+```rust
+use docx_rust::{Docx, document::{Paragraph, Run}, media::Pic};
+use std::fs;
+
+let svg = fs::read("logo.svg").unwrap();
+let png = fs::read("logo.png").unwrap();   // pre-rasterised fallback
+
+let mut docx = Docx::default();
+let ids = docx.add_svg("logo", &svg, &png);
+let drawing = Pic::with_svg(ids).size_px(120, 60).into_drawing();
+
+let para = Paragraph::default()
+    .push(Run::default().push_image(drawing));
+docx.document.push(para);
+docx.write_file("with-svg.docx").unwrap();
+```
+
+The default build does not bundle an SVG rasteriser — callers supply
+the PNG fallback themselves. For one-call convenience, enable the
+opt-in `svg-rasterize` feature, which pulls in `resvg` + `usvg` +
+`tiny-skia`:
+
+```toml
+[dependencies]
+docx-rust = { version = "0.2", features = ["svg-rasterize"] }
+```
+
+```rust
+use docx_rust::media::{rasterize_svg, Pic};
+
+let svg = std::fs::read("logo.svg")?;
+let png = rasterize_svg(&svg, 240, 120)?;   // 2x display size for crispness
+let ids = docx.add_svg("logo", &svg, &png);
+```
+
+See [`examples/svg.rs`](./examples/svg.rs) (caller-supplied) and
+[`examples/svg_auto.rs`](./examples/svg_auto.rs) (feature-gated).
+
 ## License
 
 MIT
