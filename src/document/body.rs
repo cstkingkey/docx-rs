@@ -26,15 +26,50 @@ impl<'a> Body<'a> {
         self
     }
 
+    /// Insert content immediately before the trailing `<w:sectPr>` if
+    /// one exists; otherwise append. Use this instead of [`push`] when
+    /// adding paragraphs/tables to a document that already has headers
+    /// or footers wired in — appending after the trailing `<w:sectPr>`
+    /// creates a second section, which Word treats as a section break
+    /// and which detaches the new content from the configured
+    /// headers/footers.
+    ///
+    /// [`push`]: Body::push
+    pub fn push_before_section_property<T: Into<BodyContent<'a>>>(
+        &mut self,
+        content: T,
+    ) -> &mut Self {
+        if matches!(self.content.last(), Some(BodyContent::SectionProperty(_))) {
+            let pos = self.content.len() - 1;
+            self.content.insert(pos, content.into());
+        } else {
+            self.content.push(content.into());
+        }
+        self
+    }
+
     /// Return the trailing `<w:sectPr>` of this body, creating an
     /// empty one if absent.
     ///
     /// Headers and footers are wired into a section via
     /// `<w:headerReference>` / `<w:footerReference>` children of a
-    /// `<w:sectPr>`. A well-formed document has exactly one section
-    /// property at the end of the body; this helper makes that
-    /// guaranteed without forcing every caller to walk the content
-    /// vector.
+    /// `<w:sectPr>`. This helper guarantees a trailing section
+    /// property *at the moment it is called* so callers (typically
+    /// [`Docx::add_header`] / [`Docx::add_footer`]) can attach a
+    /// reference without walking the content vector.
+    ///
+    /// **Caveat:** [`Body::push`] always appends, so any body content
+    /// added *after* this helper runs lands after the trailing
+    /// `<w:sectPr>`, producing an unintended second section. Order of
+    /// operations matters:
+    ///
+    /// * Add all body content (paragraphs, tables, SDTs) **first**.
+    /// * Then call `add_header` / `add_footer` once everything is in.
+    /// * If you must add body content after wiring headers/footers,
+    ///   use [`Body::push_before_section_property`] instead of `push`.
+    ///
+    /// [`Docx::add_header`]: crate::Docx::add_header
+    /// [`Docx::add_footer`]: crate::Docx::add_footer
     pub fn last_section_property_mut_or_create(&mut self) -> &mut SectionProperty<'a> {
         let last_is_sect_pr = matches!(self.content.last(), Some(BodyContent::SectionProperty(_)));
         if !last_is_sect_pr {
