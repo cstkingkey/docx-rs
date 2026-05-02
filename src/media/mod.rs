@@ -23,17 +23,9 @@ pub fn get_media_type_relation_type(mt: &MediaType) -> &'static str {
 }
 
 pub fn get_media_type(filename: &str) -> Option<MediaType> {
-    if filename.ends_with("png")
-        | filename.ends_with("jpg")
-        | filename.ends_with("jpeg")
-        | filename.ends_with("bmp")
-        | filename.ends_with("gif")
-        | filename.ends_with("tif")
-        | filename.ends_with("tiff")
-        | filename.ends_with("svg")
-    {
-        Some(MediaType::Image)
-    } else {
-        None
+    let ext = filename.rsplit('.').next()?.to_ascii_lowercase();
+    match ext.as_str() {
+        "png" | "jpg" | "jpeg" | "bmp" | "gif" | "tif" | "tiff" | "svg" => Some(MediaType::Image),
+        _ => None,
     }
 }
