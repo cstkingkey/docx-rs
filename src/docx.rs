@@ -318,8 +318,8 @@ impl<'a> Docx<'a> {
     pub fn add_svg(
         &mut self,
         name_stem: impl Into<Cow<'a, str>>,
-        svg_bytes: &'a Vec<u8>,
-        png_fallback_bytes: &'a Vec<u8>,
+        svg_bytes: &'a [u8],
+        png_fallback_bytes: &'a [u8],
     ) -> crate::media::SvgImageIds {
         let stem = name_stem.into();
         let svg_filename = format!("{}.svg", stem);
@@ -448,9 +448,16 @@ impl<'a> Docx<'a> {
 
     fn ensure_settings_for_type(&mut self, ty: &HeaderFooterReferenceType) {
         if matches!(ty, HeaderFooterReferenceType::Even) {
+            let settings_was_absent = self.settings.is_none();
             let settings = self.settings.get_or_insert_with(Settings::default);
             if settings.even_and_odd_headers.is_none() {
                 settings.even_and_odd_headers = Some(crate::settings::EvenAndOddHeaders::default());
+            }
+            if settings_was_absent {
+                self.ensure_part_override(
+                    "/word/settings.xml",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml",
+                );
             }
         }
     }
